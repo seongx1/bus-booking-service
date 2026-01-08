@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>韩国巴士包车：巴士租赁及小型巴士租赁 - 韩国最佳巴士租赁服务</title>
+    <link rel="stylesheet" href="styles_v2.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">KoreaBusCharter.com</span>
+                <span class="logo-subtitle">韩国最佳巴士租赁服务</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home">首页</a></li>
+                <li><a href="#quote">获取报价</a></li>
+                <li><a href="#services">服务</a></li>
+                <li><a href="#fleet">车队</a></li>
+                <li><a href="#contact">联系我们</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="language-selector">
+                    <button class="lang-toggle" id="langToggle" aria-expanded="false" aria-haspopup="true">
+                        <span class="lang-icon">🌐</span>
+                        <span class="lang-current">中文</span>
+                        <span class="lang-arrow">▼</span>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <button class="lang-option" data-lang="en">
+                            <span>English</span>
+                            <span class="lang-subtitle">(英语)</span>
+                        </button>
+                        <button class="lang-option" data-lang="ko">
+                            <span>한국어</span>
+                            <span class="lang-subtitle">(韩语)</span>
+                        </button>
+                        <button class="lang-option" data-lang="zh" aria-current="true">
+                            <span>中文</span>
+                            <span class="lang-subtitle">(Chinese)</span>
+                        </button>
+                        <button class="lang-option" data-lang="ja">
+                            <span>日本語</span>
+                            <span class="lang-subtitle">(日语)</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-background">
+            <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1920&q=80" alt="韩国巴士包车服务" loading="lazy">
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge">数千名国际游客信赖的服务</div>
+            <h1 class="hero-title">
+                <span>韩国巴士包车：巴士租赁及小型巴士租赁</span>
+            </h1>
+            <p class="hero-subtitle">韩国领先的巴士包车及带司机巴士租赁服务</p>
+            <p class="hero-description">
+                <span>预订韩国最佳巴士租赁服务</span><br>
+                <span>舒适便捷地探索韩国</span>
+            </p>
+            <div class="hero-buttons">
+                <a href="#quote" class="btn btn-primary">立即获取报价</a>
+            </div>
+            <div class="hero-certifications">
+                <div class="cert-badge">韩国旅游发展局认证</div>
+                <div class="cert-badge">多语言服务</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quote Section -->
+    <section id="quote" class="quote-section">
+        <div class="container">
+            <h2 class="section-title">获取报价</h2>
+            <form class="quote-form" id="quoteForm">
+                <div class="form-group">
+                    <label for="name">姓名</label>
+                    <input type="text" id="name" name="name" placeholder="请输入您的姓名" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">联系电话</label>
+                    <input type="tel" id="phone" name="contact" placeholder="请输入您的电话号码（含国家代码）" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">电子邮箱</label>
+                    <input type="email" id="email" name="email" placeholder="请输入您的电子邮箱地址" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">咨询详情</label>
+                    <textarea id="message" name="message" rows="5" placeholder="请告诉我们您的旅行计划：目的地、日期、人数等" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-large">获取报价</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Lowest Price Guarantee -->
+    <section class="guarantee-section">
+        <div class="container">
+            <h2 class="section-title">全包价格 - 无隐藏费用！</h2>
+            <p class="section-subtitle">我们的报价包括车辆、司机、燃油、过路费、停车费和保险，<br>全包价格，无隐藏费用。我们会提前告知您完整价格。</p>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <h2 class="section-title">韩国全境巴士包车服务</h2>
+            <p class="section-subtitle">简单便捷的巴士包车预订服务。<br>非常适合国际游客，无需担心在韩国驾驶，轻松享受您的旅程。</p>
+            
+            <div class="services-grid">
+                <div class="service-item">
+                    <h3>首尔巴士租赁</h3>
+                    <p>从仁川机场到首尔约60-90公里，车程1-2小时。<br>我们的带司机巴士租赁服务让团体前往首尔变得轻松简单。</p>
+                </div>
+                <div class="service-item">
+                    <h3>机场接送服务</h3>
+                    <p><strong>仁川机场到首尔：</strong> 约60-90公里，车程1-2小时。<br>免费机场接送，提供90分钟等待时间。<br>同时服务金浦、金海（釜山）、济州、大邱和清州机场。</p>
+                </div>
+                <div class="service-item">
+                    <h3>团体旅行包车服务</h3>
+                    <p>大型巴士可容纳最多43-45名乘客及行李。<br>非常适合大型团体旅游、企业活动、学校旅行和家庭聚会。</p>
+                </div>
+                <div class="service-item">
+                    <h3>城市观光</h3>
+                    <p>首尔城市观光、釜山城市观光、济州岛观光、<br>庆州历史观光、DMZ观光、传统村庄观光等多样化的观光路线。</p>
+                </div>
+                <div class="service-item">
+                    <h3>文化与遗产观光</h3>
+                    <p>庆州（古都）、全州（韩屋村）、安东（河回村）、<br>水原（华城）、江陵（传统文化）、统营（历史港口）等<br>韩国的美丽文化遗产观光路线。</p>
+                </div>
+                <div class="service-item">
+                    <h3>传统体验观光</h3>
+                    <p>韩国传统酒类观光、寺庙住宿体验、<br>K-Pop & K-Drama拍摄地观光、传统市场观光、韩服体验观光等<br>多种韩国文化体验项目。</p>
+                </div>
+                <div class="service-item">
+                    <h3>企业巴士租赁</h3>
+                    <p>商务活动、会议及贸易展览、企业团建、<br>团队建设活动、国际商务会议等<br>为企业客户提供的专业服务。</p>
+                </div>
+                <div class="service-item">
+                    <h3>私人巴士租赁服务</h3>
+                    <p>为商务、企业、家庭或团体活动提供私人巴士运输服务。<br>城市观光或前往韩国著名景点，<br>可靠、安全、全包价格。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fleet Section -->
+    <section id="fleet" class="fleet-section">
+        <div class="container">
+            <h2 class="section-title">我们的车队</h2>
+            <p class="section-subtitle">从我们广泛的巴士和客车中选择 - 全部配备空调、导航系统和清洁的内饰</p>
+            <div class="fleet-grid">
+                <div class="fleet-item">44座包车巴士</div>
+                <div class="fleet-item">45座大型巴士</div>
+                <div class="fleet-item">33座巴士</div>
+                <div class="fleet-item">28座小型巴士</div>
+                <div class="fleet-item">25座小型巴士</div>
+                <div class="fleet-item">15座面包车</div>
+                <div class="fleet-item">11座面包车</div>
+                <div class="fleet-item">9座面包车</div>
+                <div class="fleet-item">7座SUV</div>
+                <div class="fleet-item">带司机轿车</div>
+            </div>
+            <p style="margin-top: 2rem; text-align: center; color: #666; font-size: 0.95em;">非常适合大型团体旅游、机场接送和韩国全境长途地面交通</p>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="why-section">
+        <div class="container">
+            <h2 class="section-title">带司机巴士租赁 - 韩国最佳价值</h2>
+            <p class="section-subtitle">我们专门为访问韩国的国际游客提供可靠、清洁、舒适的巴士租赁服务。<br>我们的多语言司机确保您在韩国全境的顺畅旅程。</p>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">✈️</div>
+                    <h3 class="feature-title">机场接送服务</h3>
+                    <p class="feature-description">免费机场接送，航班抵达后提供最多90分钟的免费等待时间。<br>我们的司机将在抵达口等待，为您提供前往首尔或韩国任何目的地的顺畅接送服务。</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✅</div>
+                    <h3 class="feature-title">全包价格</h3>
+                    <p class="feature-description">包括巴士、司机、燃油、过路费和停车费的综合价格。<br>无隐藏费用，您清楚知道您支付的费用。</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⭐</div>
+                    <h3 class="feature-title">游客信赖</h3>
+                    <p class="feature-description">受到世界各地国际游客的高度评价。<br>我们的评价展示了我们为韩国游客服务的可靠性和承诺。</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔧</div>
+                    <h3 class="feature-title">清洁可靠的巴士</h3>
+                    <p class="feature-description">所有车辆状况良好，配备空调、导航系统和现代化设施。<br>定期专业维护确保您的安全和舒适。</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">👔</div>
+                    <h3 class="feature-title">门到门服务</h3>
+                    <p class="feature-description">韩国全境便捷的门到门服务。<br>专业多语言司机确保在您指定的地点准时接送。</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🛡️</div>
+                    <h3 class="feature-title">认证专业司机</h3>
+                    <p class="feature-description">完全持证、认证和投保的司机，对韩国道路和旅游景点有广泛了解。<br>许多司机会说英语、日语和中文。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2 class="section-title">联系我们</h2>
+            <p class="section-subtitle">如有任何问题，请随时联系我们</p>
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <div class="contact-icon">📞</div>
+                    <h3 class="contact-title">电话</h3>
+                    <p class="contact-description">+82-1644-0464</p>
+                    <p class="contact-description" style="font-size: 0.9em; margin-top: 0.5em;">提供英语、日语、中文服务</p>
+                    <a href="tel:+8216440464" class="contact-link">立即致电 →</a>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">📧</div>
+                    <h3 class="contact-title">电子邮件咨询</h3>
+                    <p class="contact-description">通过电子邮件联系我们获取报价和咨询</p>
+                    <p class="contact-description" style="font-size: 0.9em; margin-top: 0.5em;">我们提供英语、日语、中文回复</p>
+                    <a href="mailto:noguri@gommal.com" class="contact-link">发送电子邮件 →</a>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">🌐</div>
+                    <h3 class="contact-title">在线获取报价</h3>
+                    <p class="contact-description">填写我们的在线表格以获取即时报价</p>
+                    <a href="#quote" class="contact-link">获取报价 →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <span class="logo-text">KoreaBusCharter.com</span>
+                    <p class="footer-tagline">韩国最佳巴士租赁服务</p>
+                    <p class="footer-description">KoreaBusCharter.com为国际游客提供韩国最佳巴士租赁服务。我们提供舒适、可靠、价格合理的巴士租赁服务，并提供多语言支持。</p>
+                </div>
+                <div class="footer-links-section">
+                    <div class="footer-column">
+                        <h4>快速链接</h4>
+                        <ul>
+                            <li><a href="#home">首页</a></li>
+                            <li><a href="#quote">获取报价</a></li>
+                            <li><a href="#services">服务</a></li>
+                            <li><a href="#fleet">车队</a></li>
+                            <li><a href="#contact">联系我们</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-company-info">
+                <div class="company-info-grid">
+                    <div class="company-info-item">
+                        <strong>公司：</strong> JS Naru Co., Ltd.
+                    </div>
+                    <div class="company-info-item">
+                        <strong>首席执行官：</strong> Han Sang-hyeong
+                    </div>
+                    <div class="company-info-item">
+                        <strong>隐私负责人：</strong> Han Sang-hyeong
+                    </div>
+                    <div class="company-info-item">
+                        <strong>电话：</strong> +82-1644-0464
+                    </div>
+                    <div class="company-info-item">
+                        <strong>电子邮箱：</strong> <a href="mailto:noguri@gommal.com">noguri@gommal.com</a>
+                    </div>
+                    <div class="company-info-item">
+                        <strong>地址：</strong> 济州特别自治道济州市旧南路7街13-2 3楼
+                    </div>
+                    <div class="company-info-item">
+                        <strong>营业执照号：</strong> 568-88-01861
+                    </div>
+                    <div class="company-info-item">
+                        <strong>电子商务注册号：</strong> 2024-济州二道-0136
+                    </div>
+                    <div class="company-info-item">
+                        <strong>安全购买（托管）服务会员</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-links">
+                <span></span>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 诺古里旅行社. 2026 版权所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Quote form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const quoteForm = document.getElementById('quoteForm');
+            if (quoteForm) {
+                quoteForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(quoteForm);
+                const data = Object.fromEntries(formData);
+                
+                if (!SLACK_WEBHOOK_URL || SLACK_WEBHOOK_URL === 'YOUR_WEBHOOK_URL_HERE') {
+                    showNotification('⚠️ Slack Webhook未配置。请联系管理员。', 'error');
+                    return;
+                }
+                
+                const submitButton = quoteForm.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.textContent;
+                submitButton.disabled = true;
+                submitButton.textContent = '发送中...';
+                
+                try {
+                    const slackMessage = {
+                        text: '🚌 新的报价请求已收到',
+                        blocks: [
+                            {
+                                type: 'header',
+                                text: {
+                                    type: 'plain_text',
+                                    text: '🚌 新的报价请求 - 中文'
+                                }
+                            },
+                            {
+                                type: 'section',
+                                fields: [
+                                    {
+                                        type: 'mrkdwn',
+                                        text: `*姓名:*\n${data.name || 'N/A'}`
+                                    },
+                                    {
+                                        type: 'mrkdwn',
+                                        text: `*联系电话:*\n${data.contact || 'N/A'}`
+                                    },
+                                    {
+                                        type: 'mrkdwn',
+                                        text: `*电子邮箱:*\n${data.email || 'N/A'}`
+                                    },
+                                    {
+                                        type: 'mrkdwn',
+                                        text: `*提交时间:*\n${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Seoul' })}`
+                                    }
+                                ]
+                            },
+                            {
+                                type: 'section',
+                                text: {
+                                    type: 'mrkdwn',
+                                    text: `*咨询内容:*\n\`\`\`${data.message || 'N/A'}\`\`\``
+                                }
+                            },
+                            {
+                                type: 'divider'
+                            },
+                            {
+                                type: 'context',
+                                elements: [
+                                    {
+                                        type: 'mrkdwn',
+                                        text: `📧 回复至: <mailto:${data.email}|${data.email}>`
+                                    }
+                                ]
+                            }
+                        ]
+                    };
+                    
+                    const response = await fetch(SLACK_WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(slackMessage)
+                    });
+                    
+                    if (response.ok) {
+                        showNotification('✅ 您的报价请求已成功发送！我们将尽快回复您！');
+                        quoteForm.reset();
+                    } else {
+                        throw new Error('Slack发送失败');
+                    }
+                } catch (error) {
+                    console.error('Slack发送错误:', error);
+                    showNotification('❌ 发送时发生错误。请稍后重试。', 'error');
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
+                }
+            });
+            }
+        });
+
+        // Language selector functionality
+        const langToggle = document.getElementById('langToggle');
+        const langDropdown = document.getElementById('langDropdown');
+        const langOptions = document.querySelectorAll('.lang-option');
+
+        if (langToggle && langDropdown) {
+            langToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isExpanded = langToggle.getAttribute('aria-expanded') === 'true';
+                langToggle.setAttribute('aria-expanded', !isExpanded);
+                langDropdown.classList.toggle('active');
+            });
+
+            langOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const lang = this.getAttribute('data-lang');
+                    const langMap = {
+                        'en': 'index_v2.html',
+                        'ko': 'index_v2_ko.html',
+                        'zh': 'index_v2_zh.html',
+                        'ja': 'index_v2_ja.html'
+                    };
+                    
+                    if (langMap[lang]) {
+                        window.location.href = langMap[lang];
+                    }
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!langToggle.contains(e.target) && !langDropdown.contains(e.target)) {
+                    langDropdown.classList.remove('active');
+                    langToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            langToggle.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    langToggle.click();
+                } else if (e.key === 'Escape') {
+                    langDropdown.classList.remove('active');
+                    langToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
+        // Smooth scroll with offset for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href === '#' || href === '#home') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+                
+                const target = document.querySelector(`section${href}`);
+                if (target) {
+                    e.preventDefault();
+                    const navHeight = 80;
+                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
