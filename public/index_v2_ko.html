@@ -322,7 +322,7 @@
             window.SLACK_WEBHOOK_URL = SLACK_WEBHOOK_URL;
         }
     </script>
-    <script src="config.js"></script>
+    <script src="config.js" onerror="console.log('config.js not found, using inline Webhook URL')"></script>
     <script src="script.js"></script>
     <script>
         // Quote form submission
