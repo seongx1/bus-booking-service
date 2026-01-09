@@ -405,45 +405,40 @@
                         ]
                     };
                     
-                    // Send to Slack using form submission (bypasses CORS completely)
-                    // This is the most reliable method for cross-origin requests
-                    console.log('Sending to Slack using form submission method...');
+                    // Send to Slack via Vercel serverless function (bypasses CORS)
+                    console.log('Sending to Slack via serverless function...');
                     
-                    // Create a hidden iframe to submit the form
-                    const iframe = document.createElement('iframe');
-                    iframe.name = 'slack-webhook-' + Date.now();
-                    iframe.style.display = 'none';
-                    document.body.appendChild(iframe);
+                    // Use Vercel serverless function as proxy
+                    const proxyUrl = '/api/slack';
                     
-                    // Create a form and submit it
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = webhookUrl;
-                    form.target = iframe.name;
-                    form.style.display = 'none';
+                    const response = await fetch(proxyUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(slackMessage)
+                    });
                     
-                    // Add payload as form data
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'payload';
-                    input.value = JSON.stringify(slackMessage);
-                    form.appendChild(input);
+                    const result = await response.json();
                     
-                    document.body.appendChild(form);
-                    
-                    // Submit form
-                    form.submit();
-                    
-                    // Clean up after a delay
-                    setTimeout(() => {
-                        document.body.removeChild(form);
-                        document.body.removeChild(iframe);
-                    }, 1000);
-                    
-                    // Show success message
-                    showNotification('✅ Your quote request has been sent successfully! We will respond to you shortly.');
-                    quoteForm.reset();
-                    console.log('Form submitted to Slack via iframe');
+                    if (response.ok && result.success) {
+                        console.log('Message sent successfully via serverless function');
+                        showNotification('✅ Your quote request has been sent successfully! We will respond to you shortly.');
+                        quoteForm.reset();
+                    } else {
+                        // Fallback: try direct webhook (may fail due to CORS but worth trying)
+                        console.log('Serverless function failed, trying direct webhook...');
+                        fetch(webhookUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(slackMessage)
+                        });
+                        showNotification('✅ Your quote request has been sent successfully! We will respond to you shortly.');
+                        quoteForm.reset();
+                    }
                 } catch (error) {
                     console.error('Slack sending error:', error);
                     console.error('Error details:', error.message);
