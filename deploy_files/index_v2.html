@@ -405,30 +405,48 @@
                         ]
                     };
                     
-                    // Send to Slack
-                    console.log('Fetch request starting...');
-                    const response = await fetch(webhookUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(slackMessage)
-                    }).catch(async (fetchError) => {
-                        console.error('Fetch error details:', fetchError);
-                        // no-cors 모드에서는 response를 확인할 수 없으므로, 항상 성공으로 처리
-                        // 실제로는 Slack이 메시지를 받았는지 확인할 수 없지만, 요청은 전송됨
-                        return { ok: true, status: 200 };
-                    });
+                    // Send to Slack using XMLHttpRequest (more reliable for cross-origin)
+                    console.log('Sending to Slack via XMLHttpRequest...');
                     
-                    // no-cors 모드에서는 response가 opaque이므로 항상 성공으로 처리
-                    showNotification('✅ Your quote request has been sent successfully! We will respond to you shortly.');
-                    quoteForm.reset();
-                    console.log('Message sent successfully');
+                    return new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', webhookUrl, true);
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        
+                        xhr.onload = function() {
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                console.log('Message sent successfully, status:', xhr.status);
+                                showNotification('✅ Your quote request has been sent successfully! We will respond to you shortly.');
+                                quoteForm.reset();
+                                resolve();
+                            } else {
+                                console.error('Slack request failed with status:', xhr.status, xhr.responseText);
+                                showNotification('❌ An error occurred while sending. Please try again later.', 'error');
+                                reject(new Error('Slack request failed'));
+                            }
+                        };
+                        
+                        xhr.onerror = function() {
+                            console.error('Network error occurred');
+                            showNotification('❌ Network error. Please check your connection and try again.', 'error');
+                            reject(new Error('Network error'));
+                        };
+                        
+                        xhr.ontimeout = function() {
+                            console.error('Request timeout');
+                            showNotification('❌ Request timeout. Please try again later.', 'error');
+                            reject(new Error('Request timeout'));
+                        };
+                        
+                        xhr.timeout = 10000; // 10초 타임아웃
+                        xhr.send(JSON.stringify(slackMessage));
+                    });
                 } catch (error) {
                     console.error('Slack sending error:', error);
-                    console.error('Error details:', error.message, error.stack);
-                    showNotification('❌ An error occurred while sending. Please try again later.', 'error');
+                    console.error('Error details:', error.message);
+                    if (!error.message.includes('Network error') && !error.message.includes('timeout')) {
+                        showNotification('❌ An error occurred while sending. Please try again later.', 'error');
+                    }
                 } finally {
                     // Re-enable submit button
                     submitButton.disabled = false;
