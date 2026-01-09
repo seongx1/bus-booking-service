@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>韓国バスチャーター：バスレンタル＆ミニバスレンタル - 韓国最高のバスレンタルサービス</title>
-    <link rel="stylesheet" href="../src/css/styles_v2.css">
+    <link rel="stylesheet" href="styles_v2.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -314,8 +314,16 @@
         </div>
     </footer>
 
-    <script src="../config/config.js"></script>
-    <script src="../src/js/script.js"></script>
+    <script>
+        // Slack Webhook URL 설정 (config.js가 없을 경우를 대비하여 여기에도 설정)
+        // 전역 변수로 선언하여 모든 스크립트에서 접근 가능하도록 함
+        if (typeof SLACK_WEBHOOK_URL === 'undefined') {
+            var SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
+            window.SLACK_WEBHOOK_URL = SLACK_WEBHOOK_URL;
+        }
+    </script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
     <script>
         // Quote form submission
         document.addEventListener('DOMContentLoaded', function() {
@@ -327,7 +335,9 @@
                 const formData = new FormData(quoteForm);
                 const data = Object.fromEntries(formData);
                 
-                if (!SLACK_WEBHOOK_URL || SLACK_WEBHOOK_URL === 'YOUR_WEBHOOK_URL_HERE') {
+                // Check if Slack Webhook URL is configured
+                const webhookUrl = typeof SLACK_WEBHOOK_URL !== 'undefined' ? SLACK_WEBHOOK_URL : (typeof window !== 'undefined' && window.SLACK_WEBHOOK_URL ? window.SLACK_WEBHOOK_URL : null);
+                if (!webhookUrl || webhookUrl === 'YOUR_WEBHOOK_URL_HERE') {
                     showNotification('⚠️ Slack Webhookが設定されていません。管理者にお問い合わせください。', 'error');
                     return;
                 }
@@ -391,7 +401,7 @@
                         ]
                     };
                     
-                    const response = await fetch(SLACK_WEBHOOK_URL, {
+                    const response = await fetch(webhookUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -486,6 +496,78 @@
                 }
             });
         });
+
+        // Notification function
+        function showNotification(message, type = 'success') {
+            // Remove existing notification if any
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            // Set background color based on type
+            const backgroundColor = type === 'error' ? '#d32f2f' : '#1d1d1f';
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 60px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: ${backgroundColor};
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                font-size: 14px;
+                z-index: 10000;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                animation: slideDown 0.3s ease-out;
+                max-width: 90%;
+                text-align: center;
+            `;
+            
+            // Add animation
+            const style = document.createElement('style');
+            if (!document.querySelector('#notification-styles')) {
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideDown {
+                        from {
+                            opacity: 0;
+                            transform: translateX(-50%) translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateX(-50%) translateY(0);
+                        }
+                    }
+                    @keyframes slideUp {
+                        from {
+                            opacity: 1;
+                            transform: translateX(-50%) translateY(0);
+                        }
+                        to {
+                            opacity: 0;
+                            transform: translateX(-50%) translateY(-20px);
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideUp 0.3s ease-out';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 5000);
+        }
     </script>
 </body>
 </html>
