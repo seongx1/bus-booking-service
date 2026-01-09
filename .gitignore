@@ -1,0 +1,14 @@
+# Slack Webhook URL 보안을 위해 config.js는 제외
+config.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
