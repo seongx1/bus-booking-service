@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>한국 버스 차터: 버스 대여 및 미니버스 대여 - 한국 최고의 버스 대여 서비스</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+    <link rel="shortcut icon" href="favicon.ico">
     <link rel="stylesheet" href="styles_v2.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -323,6 +329,26 @@
         console.log('✅ Slack Webhook URL이 설정되었습니다');
     </script>
     <script src="script.js"></script>
+    <script>
+        // Remove hero-logo element if it exists
+        document.addEventListener('DOMContentLoaded', function() {
+            const heroLogo = document.querySelector('.hero-logo');
+            if (heroLogo) {
+                heroLogo.remove();
+            }
+            // Also use MutationObserver to catch dynamically added elements
+            const observer = new MutationObserver(function(mutations) {
+                const heroLogo = document.querySelector('.hero-logo');
+                if (heroLogo) {
+                    heroLogo.remove();
+                }
+            });
+            const heroContent = document.querySelector('.hero-content');
+            if (heroContent) {
+                observer.observe(heroContent, { childList: true, subtree: true });
+            }
+        });
+    </script>
     <script>
         // Quote form submission
         document.addEventListener('DOMContentLoaded', function() {

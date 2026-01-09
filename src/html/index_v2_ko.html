@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>한국 버스 차터: 버스 대여 및 미니버스 대여 - 한국 최고의 버스 대여 서비스</title>
-    <link rel="stylesheet" href="styles_v2.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/android-chrome-512x512.png">
+    <link rel="shortcut icon" href="../assets/images/favicon.ico">
+    <link rel="stylesheet" href="../css/styles_v2.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +21,7 @@
         <div class="nav-container">
             <div class="nav-logo">
                 <a href="#home">
-                    <img src="logo-가로.png" alt="K-BUS CHARTER 로고" class="logo-image">
+                    <img src="../assets/images/logo-가로.png" alt="K-BUS CHARTER 로고" class="logo-image">
                 </a>
             </div>
             <ul class="nav-menu">
@@ -318,11 +324,31 @@
     <script>
         // Slack Webhook URL 설정
         // 전역 변수로 선언하여 모든 스크립트에서 접근 가능하도록 함
-        var SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
+        var SLACK_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';
         window.SLACK_WEBHOOK_URL = SLACK_WEBHOOK_URL;
         console.log('✅ Slack Webhook URL이 설정되었습니다');
     </script>
-    <script src="script.js"></script>
+    <script src="../js/script.js"></script>
+    <script>
+        // Remove hero-logo element if it exists
+        document.addEventListener('DOMContentLoaded', function() {
+            const heroLogo = document.querySelector('.hero-logo');
+            if (heroLogo) {
+                heroLogo.remove();
+            }
+            // Also use MutationObserver to catch dynamically added elements
+            const observer = new MutationObserver(function(mutations) {
+                const heroLogo = document.querySelector('.hero-logo');
+                if (heroLogo) {
+                    heroLogo.remove();
+                }
+            });
+            const heroContent = document.querySelector('.hero-content');
+            if (heroContent) {
+                observer.observe(heroContent, { childList: true, subtree: true });
+            }
+        });
+    </script>
     <script>
         // Quote form submission
         document.addEventListener('DOMContentLoaded', function() {
@@ -335,11 +361,18 @@
                 const data = Object.fromEntries(formData);
                 
                 // Check if Slack Webhook URL is configured
-                const webhookUrl = typeof SLACK_WEBHOOK_URL !== 'undefined' ? SLACK_WEBHOOK_URL : (typeof window !== 'undefined' && window.SLACK_WEBHOOK_URL ? window.SLACK_WEBHOOK_URL : null);
-                if (!webhookUrl || webhookUrl === 'YOUR_WEBHOOK_URL_HERE') {
+                const slackWebhookUrl = typeof SLACK_WEBHOOK_URL !== 'undefined' ? SLACK_WEBHOOK_URL : (typeof window !== 'undefined' && window.SLACK_WEBHOOK_URL ? window.SLACK_WEBHOOK_URL : null);
+                if (!slackWebhookUrl || slackWebhookUrl === 'YOUR_WEBHOOK_URL_HERE') {
                     showNotification('⚠️ Slack Webhook이 설정되지 않았습니다. 관리자에게 문의하세요.', 'error');
                     return;
                 }
+                
+                // 로컬 환경 감지: localhost 또는 127.0.0.1인 경우 프록시 서버 사용
+                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '';
+                const webhookUrl = isLocal ? 'http://localhost:8888/slack-webhook' : slackWebhookUrl;
+                
+                console.log('Environment:', isLocal ? 'Local (using proxy)' : 'Production (direct)');
+                console.log('Webhook URL:', webhookUrl.substring(0, 50) + '...');
                 
                 const submitButton = quoteForm.querySelector('button[type="submit"]');
                 const originalButtonText = submitButton.textContent;
@@ -400,78 +433,99 @@
                         ]
                     };
                     
-                    // Send to Slack using multiple methods simultaneously to maximize delivery
-                    console.log('Sending to Slack using multiple methods...');
-                    
-                    let methodsAttempted = 0;
-                    let methodsCompleted = 0;
-                    
-                    // Method 1: navigator.sendBeacon (most reliable for cross-origin)
-                    if (navigator.sendBeacon) {
-                        methodsAttempted++;
-                        const blob = new Blob([JSON.stringify(slackMessage)], { type: 'application/json' });
-                        const sent = navigator.sendBeacon(webhookUrl, blob);
-                        if (sent) {
-                            methodsCompleted++;
-                            console.log('Method 1 (sendBeacon): Success');
+                    // 로컬 환경에서는 프록시를 통해 전송 (CORS 문제 해결)
+                    if (isLocal) {
+                        console.log('Sending to Slack via proxy server...');
+                        const response = await fetch(webhookUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(slackMessage)
+                        });
+                        
+                        const result = await response.json();
+                        if (result.success) {
+                            console.log('✅ Message sent successfully via proxy');
+                            showNotification('✅ 견적 요청이 성공적으로 전송되었습니다. 빠른 시일 내에 답변드리겠습니다!');
+                            quoteForm.reset();
                         } else {
-                            console.log('Method 1 (sendBeacon): Failed');
+                            throw new Error(result.error || 'Failed to send message');
                         }
+                    } else {
+                        // 배포 환경에서는 여러 방법을 시도하여 최대한 확실하게 전송
+                        console.log('Sending to Slack using multiple methods...');
+                        
+                        let methodsAttempted = 0;
+                        let methodsCompleted = 0;
+                        
+                        // Method 1: navigator.sendBeacon (most reliable for cross-origin)
+                        if (navigator.sendBeacon) {
+                            methodsAttempted++;
+                            const blob = new Blob([JSON.stringify(slackMessage)], { type: 'application/json' });
+                            const sent = navigator.sendBeacon(webhookUrl, blob);
+                            if (sent) {
+                                methodsCompleted++;
+                                console.log('Method 1 (sendBeacon): Success');
+                            } else {
+                                console.log('Method 1 (sendBeacon): Failed');
+                            }
+                        }
+                        
+                        // Method 2: fetch with no-cors
+                        methodsAttempted++;
+                        fetch(webhookUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(slackMessage)
+                        }).then(() => {
+                            methodsCompleted++;
+                            console.log('Method 2 (no-cors fetch): Request sent');
+                        }).catch((err) => {
+                            console.log('Method 2 error (but request may have been sent):', err);
+                        });
+                        
+                        // Method 3: iframe form submission
+                        methodsAttempted++;
+                        try {
+                            const iframe = document.createElement('iframe');
+                            iframe.name = 'slack-' + Date.now();
+                            iframe.style.display = 'none';
+                            document.body.appendChild(iframe);
+                            
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = webhookUrl;
+                            form.target = iframe.name;
+                            form.style.display = 'none';
+                            
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'payload';
+                            input.value = JSON.stringify(slackMessage);
+                            form.appendChild(input);
+                            document.body.appendChild(form);
+                            form.submit();
+                            
+                            methodsCompleted++;
+                            console.log('Method 3 (iframe form): Submitted');
+                            
+                            setTimeout(() => {
+                                if (document.body.contains(form)) document.body.removeChild(form);
+                                if (document.body.contains(iframe)) document.body.removeChild(iframe);
+                            }, 2000);
+                        } catch (e) {
+                            console.log('Method 3 error:', e);
+                        }
+                        
+                        // Show success
+                        console.log(`Attempted ${methodsAttempted} methods - message should arrive in Slack`);
+                        showNotification('✅ 견적 요청이 성공적으로 전송되었습니다. 빠른 시일 내에 답변드리겠습니다!');
+                        quoteForm.reset();
                     }
-                    
-                    // Method 2: fetch with no-cors
-                    methodsAttempted++;
-                    fetch(webhookUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(slackMessage)
-                    }).then(() => {
-                        methodsCompleted++;
-                        console.log('Method 2 (no-cors fetch): Request sent');
-                    }).catch((err) => {
-                        console.log('Method 2 error (but request may have been sent):', err);
-                    });
-                    
-                    // Method 3: iframe form submission
-                    methodsAttempted++;
-                    try {
-                        const iframe = document.createElement('iframe');
-                        iframe.name = 'slack-' + Date.now();
-                        iframe.style.display = 'none';
-                        document.body.appendChild(iframe);
-                        
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = webhookUrl;
-                        form.target = iframe.name;
-                        form.style.display = 'none';
-                        
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'payload';
-                        input.value = JSON.stringify(slackMessage);
-                        form.appendChild(input);
-                        document.body.appendChild(form);
-                        form.submit();
-                        
-                        methodsCompleted++;
-                        console.log('Method 3 (iframe form): Submitted');
-                        
-                        setTimeout(() => {
-                            if (document.body.contains(form)) document.body.removeChild(form);
-                            if (document.body.contains(iframe)) document.body.removeChild(iframe);
-                        }, 2000);
-                    } catch (e) {
-                        console.log('Method 3 error:', e);
-                    }
-                    
-                    // Show success
-                    console.log(`Attempted ${methodsAttempted} methods - message should arrive in Slack`);
-                    showNotification('✅ 견적 요청이 성공적으로 전송되었습니다. 빠른 시일 내에 답변드리겠습니다!');
-                    quoteForm.reset();
                 } catch (error) {
                     console.error('Slack 전송 오류:', error);
                     console.error('Error details:', error.message, error.stack);
@@ -501,11 +555,14 @@
                 option.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const lang = this.getAttribute('data-lang');
+                    // 현재 파일 위치를 기준으로 상대 경로 계산
+                    const currentPath = window.location.pathname;
+                    const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
                     const langMap = {
-                        'en': 'index_v2.html',
-                        'ko': 'index_v2_ko.html',
-                        'zh': 'index_v2_zh.html',
-                        'ja': 'index_v2_ja.html'
+                        'en': basePath + 'index_v2.html',
+                        'ko': basePath + 'index_v2_ko.html',
+                        'zh': basePath + 'index_v2_zh.html',
+                        'ja': basePath + 'index_v2_ja.html'
                     };
                     
                     if (langMap[lang]) {

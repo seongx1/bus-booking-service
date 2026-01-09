@@ -1,5 +1,10 @@
-// Internationalization (i18n) Configuration
+/**
+ * 국제화(i18n) 설정
+ * 다국어 지원을 위한 번역 데이터 객체
+ * 지원 언어: 영어(en), 일본어(ja), 중국어(zh), 한국어(ko)
+ */
 const translations = {
+    // 영어 번역
     en: {
         logo: "Noguri Travel",
         lang: {
@@ -654,14 +659,22 @@ const translations = {
     }
 };
 
-// Current language (default: English)
+/**
+ * 현재 선택된 언어 (기본값: 영어)
+ */
 let currentLang = 'en';
 
-// Get nested translation value
+/**
+ * 중첩된 번역 키에서 값 가져오기
+ * @param {string} key - 점(.)으로 구분된 번역 키 (예: 'nav.home')
+ * @param {string} lang - 언어 코드 (en, ja, zh, ko)
+ * @returns {string|null} 번역된 문자열 또는 null
+ */
 function getTranslation(key, lang) {
     const keys = key.split('.');
     let value = translations[lang];
     
+    // 중첩된 객체 경로 탐색
     for (const k of keys) {
         if (value && typeof value === 'object' && k in value) {
             value = value[k];
@@ -673,19 +686,22 @@ function getTranslation(key, lang) {
     return typeof value === 'string' ? value : null;
 }
 
-// Update page content with translations
+/**
+ * 페이지 내용을 선택된 언어로 업데이트
+ * @param {string} lang - 변경할 언어 코드
+ */
 function updateContent(lang) {
     currentLang = lang;
     document.documentElement.lang = lang;
     
-    // Update all elements with data-i18n attribute
+    // data-i18n 속성을 가진 모든 요소 업데이트
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
         const translation = getTranslation(key, lang);
         
         if (translation) {
+            // input이나 textarea는 내용을 변경하지 않고 플레이스홀더만 변경
             if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                // Don't update input/textarea content, only placeholders
                 return;
             } else {
                 element.textContent = translation;
@@ -693,7 +709,7 @@ function updateContent(lang) {
         }
     });
     
-    // Update placeholders
+    // 플레이스홀더 업데이트
     document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
         const key = element.getAttribute('data-i18n-placeholder');
         const translation = getTranslation(key, lang);
@@ -703,12 +719,11 @@ function updateContent(lang) {
         }
     });
     
-    // Force English locale for date inputs
+    // 날짜 입력 필드는 항상 영어 로케일 유지
     document.querySelectorAll('input[type="date"]').forEach(dateInput => {
         dateInput.setAttribute('lang', 'en');
-        // Force English format by setting value format
+        // 영어 형식으로 강제 설정
         if (dateInput.value) {
-            // Keep the value but ensure it's in English format
             const dateValue = dateInput.value;
             dateInput.value = '';
             setTimeout(() => {
@@ -717,7 +732,7 @@ function updateContent(lang) {
         }
     });
     
-    // Update language dropdown
+    // 언어 드롭다운 UI 업데이트
     const langToggle = document.getElementById('langToggle');
     const langDropdown = document.getElementById('langDropdown');
     const langCurrent = document.querySelector('.lang-current');
@@ -729,16 +744,17 @@ function updateContent(lang) {
         }
     }
     
-    // Update language options
+    // 언어 옵션 업데이트
     document.querySelectorAll('.lang-option').forEach(option => {
         const optionLang = option.getAttribute('data-lang');
         option.removeAttribute('aria-current');
         
+        // 현재 선택된 언어 표시
         if (optionLang === lang) {
             option.setAttribute('aria-current', 'true');
         }
         
-        // Update subtitles
+        // 언어별 부제목 업데이트
         const subtitle = option.querySelector('.lang-subtitle');
         if (subtitle) {
             const subtitleKey = `lang.${optionLang}.subtitle`;
@@ -749,7 +765,7 @@ function updateContent(lang) {
         }
     });
     
-    // Close dropdown after language change
+    // 언어 변경 후 드롭다운 닫기
     if (langDropdown) {
         langDropdown.classList.remove('active');
         if (langToggle) {
@@ -757,11 +773,14 @@ function updateContent(lang) {
         }
     }
     
-    // Save language preference
+    // 언어 선호도 로컬 스토리지에 저장
     localStorage.setItem('preferredLanguage', lang);
 }
 
-// Language dropdown toggle
+/**
+ * 언어 드롭다운 토글 기능
+ * 드롭다운 열기/닫기 상태 전환
+ */
 function toggleLanguageDropdown() {
     const langToggle = document.getElementById('langToggle');
     const langDropdown = document.getElementById('langDropdown');
@@ -779,26 +798,33 @@ function toggleLanguageDropdown() {
     }
 }
 
-// Close dropdown when clicking outside
+/**
+ * 외부 클릭 시 드롭다운 닫기
+ * @param {Event} event - 클릭 이벤트
+ */
 function closeLanguageDropdown(event) {
     const langToggle = document.getElementById('langToggle');
     const langDropdown = document.getElementById('langDropdown');
     
     if (!langToggle || !langDropdown) return;
     
+    // 드롭다운 외부 클릭 시 닫기
     if (!langToggle.contains(event.target) && !langDropdown.contains(event.target)) {
         langDropdown.classList.remove('active');
         langToggle.setAttribute('aria-expanded', 'false');
     }
 }
 
-// Initialize language on page load
+/**
+ * 페이지 로드 시 언어 초기화
+ * 저장된 언어 선호도를 불러오거나 기본값(영어) 사용
+ */
 document.addEventListener('DOMContentLoaded', () => {
-    // Get saved language preference or default to English
+    // 저장된 언어 선호도 불러오기 (없으면 영어 기본값)
     const savedLang = localStorage.getItem('preferredLanguage') || 'en';
     updateContent(savedLang);
     
-    // Language dropdown toggle
+    // 언어 드롭다운 토글 버튼 이벤트
     const langToggle = document.getElementById('langToggle');
     const langDropdown = document.getElementById('langDropdown');
     
@@ -809,7 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Language option selection
+    // 언어 옵션 선택 이벤트
     if (langDropdown) {
         document.querySelectorAll('.lang-option').forEach(option => {
             option.addEventListener('click', (e) => {
@@ -820,16 +846,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Close dropdown when clicking outside
+    // 외부 클릭 시 드롭다운 닫기
     document.addEventListener('click', closeLanguageDropdown);
     
-    // Keyboard navigation for dropdown
+    // 키보드 네비게이션 (드롭다운 토글)
     if (langToggle) {
         langToggle.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 toggleLanguageDropdown();
             } else if (e.key === 'Escape') {
+                // ESC 키로 드롭다운 닫기
                 const langDropdown = document.getElementById('langDropdown');
                 if (langDropdown && langDropdown.classList.contains('active')) {
                     langDropdown.classList.remove('active');
@@ -839,7 +866,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Keyboard navigation for options
+    // 키보드 네비게이션 (언어 옵션 선택)
     document.querySelectorAll('.lang-option').forEach(option => {
         option.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {

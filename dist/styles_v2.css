@@ -1,57 +1,75 @@
-/* Trains.co.kr Inspired Design System */
+/* 
+ * Trains.co.kr에서 영감을 받은 디자인 시스템
+ * 일관된 색상, 간격, 타이포그래피를 CSS 변수로 관리합니다.
+ */
 :root {
-    --color-primary: #2563eb;
-    --color-primary-dark: #1e40af;
-    --color-primary-light: #3b82f6;
-    --color-secondary: #64748b;
-    --color-success: #10b981;
-    --color-background: #ffffff;
-    --color-surface: #f8fafc;
-    --color-text-primary: #1e293b;
-    --color-text-secondary: #64748b;
-    --color-border: #e2e8f0;
+    /* 색상 변수 */
+    --color-primary: #2563eb;              /* 주요 색상 (파란색) */
+    --color-primary-dark: #1e40af;         /* 어두운 주요 색상 */
+    --color-primary-light: #3b82f6;        /* 밝은 주요 색상 */
+    --color-secondary: #64748b;            /* 보조 색상 */
+    --color-success: #10b981;              /* 성공 색상 (초록색) */
+    --color-background: #ffffff;           /* 배경색 */
+    --color-surface: #f8fafc;              /* 표면 색상 (카드 배경 등) */
+    --color-text-primary: #1e293b;         /* 주요 텍스트 색상 */
+    --color-text-secondary: #64748b;       /* 보조 텍스트 색상 */
+    --color-border: #e2e8f0;               /* 테두리 색상 */
+    
+    /* 폰트 변수 */
     --font-family: 'Noto Sans KR', 'Noto Sans JP', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --spacing-xs: 0.5rem;
-    --spacing-sm: 1rem;
-    --spacing-md: 1.5rem;
-    --spacing-lg: 2rem;
-    --spacing-xl: 3rem;
-    --spacing-2xl: 4rem;
+    
+    /* 간격 변수 */
+    --spacing-xs: 0.5rem;   /* 8px */
+    --spacing-sm: 1rem;     /* 16px */
+    --spacing-md: 1.5rem;   /* 24px */
+    --spacing-lg: 2rem;     /* 32px */
+    --spacing-xl: 3rem;     /* 48px */
+    --spacing-2xl: 4rem;    /* 64px */
+    
+    /* 전환 효과 */
     --transition: all 0.3s ease;
+    
+    /* 모서리 둥글기 */
     --border-radius: 12px;
     --border-radius-lg: 16px;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    
+    /* 그림자 효과 */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);      /* 작은 그림자 */
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);    /* 중간 그림자 */
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);  /* 큰 그림자 */
 }
 
+/* 전체 요소 기본 스타일 초기화 */
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box;  /* 패딩과 보더를 너비에 포함 */
 }
 
+/* HTML 요소 스타일 */
 html {
-    scroll-behavior: smooth;
+    scroll-behavior: smooth;  /* 부드러운 스크롤 */
 }
 
+/* 본문 스타일 */
 body {
     font-family: var(--font-family);
     font-size: 16px;
     line-height: 1.6;
     color: var(--color-text-primary);
     background-color: var(--color-background);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;   /* 웹킷 브라우저 폰트 안티앨리어싱 */
+    -moz-osx-font-smoothing: grayscale;    /* 파이어폭스 폰트 안티앨리어싱 */
 }
 
+/* 컨테이너: 콘텐츠 최대 너비와 중앙 정렬 */
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 var(--spacing-md);
 }
 
-/* Navigation */
+/* 네비게이션 바 */
 .navbar {
     position: sticky;
     top: 0;
@@ -65,11 +83,12 @@ body {
 .nav-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 var(--spacing-md);
+    padding: 0 var(--spacing-sm);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 64px;
+    height: 56px;
+    min-height: 56px;
 }
 
 .nav-right {
@@ -91,7 +110,7 @@ body {
     text-decoration: none;
     transition: var(--transition);
     height: 100%;
-    padding: 8px 0;
+    padding: 4px 0;
 }
 
 .nav-logo a:hover {
@@ -100,12 +119,24 @@ body {
 }
 
 .logo-image {
-    height: 65px;
-    max-height: 65px;
-    width: auto;
+    height: 42px !important;
+    max-height: 42px !important;
+    min-height: 42px !important;
+    max-width: 180px !important;
+    width: auto !important;
     object-fit: contain;
     transition: var(--transition);
     display: block;
+}
+
+.nav-logo .logo-image,
+.nav-logo a .logo-image,
+.nav-logo img.logo-image {
+    height: 42px !important;
+    max-height: 42px !important;
+    min-height: 42px !important;
+    max-width: 180px !important;
+    width: auto !important;
 }
 
 .logo-text-wrapper {
@@ -138,14 +169,14 @@ body {
 .nav-menu {
     display: flex;
     list-style: none;
-    gap: var(--spacing-lg);
+    gap: var(--spacing-md);
     align-items: center;
 }
 
 .nav-menu li a {
     text-decoration: none;
     color: var(--color-text-primary);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     transition: var(--transition);
     padding: var(--spacing-xs) 0;
@@ -155,7 +186,7 @@ body {
     color: var(--color-primary);
 }
 
-/* Language Selector */
+/* 언어 선택기 (다국어 지원) */
 .language-selector {
     position: relative;
 }
@@ -163,12 +194,12 @@ body {
 .lang-toggle {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     background-color: transparent;
     border: 1px solid var(--color-border);
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: var(--border-radius);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--color-text-primary);
     cursor: pointer;
@@ -281,7 +312,7 @@ body {
     border-radius: 2px;
 }
 
-/* Hero Section */
+/* 히어로 섹션 (메인 배너 영역) */
 .hero {
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(30, 64, 175, 0.9) 100%);
     padding: var(--spacing-2xl) var(--spacing-md);
@@ -332,10 +363,7 @@ body {
 }
 
 .hero-logo {
-    margin-bottom: var(--spacing-lg);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: none !important;
 }
 
 .hero-logo-image {
@@ -458,7 +486,7 @@ body {
     font-size: 18px;
 }
 
-/* Stats Section */
+/* 통계 섹션 (성공률, 예약 시간 등의 통계 정보) */
 .stats-section {
     background-color: var(--color-surface);
     padding: var(--spacing-xl) 0;
@@ -490,7 +518,7 @@ body {
     font-weight: 500;
 }
 
-/* Section Styles */
+/* 섹션 공통 스타일 */
 section {
     padding: var(--spacing-2xl) 0;
     scroll-margin-top: 80px;
@@ -522,7 +550,7 @@ section {
     margin-bottom: var(--spacing-xl);
 }
 
-/* Why Section */
+/* 왜 선택해야 하는지 섹션 (서비스 장점 설명) */
 .why-section {
     background-color: var(--color-background);
 }
@@ -578,7 +606,7 @@ section {
     color: var(--color-text-primary);
 }
 
-/* How It Works */
+/* 작동 방법 섹션 (4단계 프로세스 설명) */
 .how-it-works {
     background-color: var(--color-surface);
 }
@@ -622,7 +650,7 @@ section {
     color: var(--color-text-secondary);
 }
 
-/* Service Areas */
+/* 서비스 지역 섹션 (공항, 도시, 스키장 등) */
 .service-areas {
     background-color: var(--color-background);
 }
@@ -666,7 +694,7 @@ section {
     color: var(--color-text-secondary);
 }
 
-/* Quote Section */
+/* 견적 요청 섹션 */
 .quote-section {
     background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
     padding: var(--spacing-2xl) 0;
@@ -794,7 +822,7 @@ section {
     cursor: pointer;
 }
 
-/* Booking Section */
+/* 예약 섹션 (예약 문의 폼) */
 .booking-section {
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
@@ -841,7 +869,7 @@ section {
     box-shadow: 0 2px 4px 0 rgba(37, 99, 235, 0.08);
 }
 
-/* Date input styling - force English format */
+/* 날짜 입력 필드 스타일 - 영어 형식 강제 */
 .form-group input[type="date"] {
     position: relative;
     color-scheme: light;
@@ -860,7 +888,7 @@ section {
     font-family: var(--font-family);
 }
 
-/* Force English locale for date input */
+/* 날짜 입력 필드에 영어 로케일 강제 적용 */
 .form-group input[type="date"]::before {
     content: attr(placeholder);
     width: 100%;
@@ -885,7 +913,7 @@ section {
     min-height: 100px;
 }
 
-/* Services Section */
+/* 서비스 섹션 */
 .services-section {
     background-color: var(--color-background);
 }
@@ -941,7 +969,7 @@ section {
     color: var(--color-text-secondary);
 }
 
-/* Fleet Section */
+/* 차량 섹션 */
 .fleet-section {
     background-color: var(--color-surface);
 }
@@ -998,7 +1026,7 @@ section {
     opacity: 0.9;
 }
 
-/* Guarantee Section */
+/* 보장 섹션 */
 .guarantee-section {
     background-color: var(--color-primary);
     color: white;
@@ -1016,7 +1044,7 @@ section {
     margin: 0 auto;
 }
 
-/* Contact Section */
+/* 연락처 섹션 */
 .contact-section {
     background-color: var(--color-background);
     scroll-margin-top: 120px;
@@ -1077,7 +1105,7 @@ section {
     transform: translateX(4px);
 }
 
-/* Footer */
+/* 푸터 (하단 정보 영역) */
 .footer {
     background-color: var(--color-text-primary);
     color: rgba(255, 255, 255, 0.8);
@@ -1252,10 +1280,10 @@ section {
     color: rgba(255, 255, 255, 0.6);
 }
 
-/* Mobile Navigation */
+/* 모바일 네비게이션 (햄버거 메뉴) */
 .nav-menu.active {
     position: fixed;
-    top: 64px;
+    top: 56px;
     left: 0;
     width: 100%;
     background-color: white;
@@ -1345,7 +1373,7 @@ section {
     }
 }
 
-/* Responsive Design */
+/* 반응형 디자인 (화면 크기별 스타일 조정) */
 @media (max-width: 768px) {
     .container {
         padding: 0 var(--spacing-sm);
@@ -1375,7 +1403,19 @@ section {
     }
     
     .logo-image {
-        height: 40px;
+        height: 38px !important;
+        max-height: 38px !important;
+        min-height: 38px !important;
+        max-width: 160px !important;
+    }
+    
+    .nav-logo .logo-image,
+    .nav-logo a .logo-image,
+    .nav-logo img.logo-image {
+        height: 38px !important;
+        max-height: 38px !important;
+        min-height: 38px !important;
+        max-width: 160px !important;
     }
     
     .hero-logo-image {
@@ -1581,7 +1621,19 @@ section {
     }
     
     .logo-image {
-        height: 35px;
+        height: 35px !important;
+        max-height: 35px !important;
+        min-height: 35px !important;
+        max-width: 140px !important;
+    }
+    
+    .nav-logo .logo-image,
+    .nav-logo a .logo-image,
+    .nav-logo img.logo-image {
+        height: 35px !important;
+        max-height: 35px !important;
+        min-height: 35px !important;
+        max-width: 140px !important;
     }
     
     .hero-logo-image {
@@ -1744,7 +1796,7 @@ section {
     }
 }
 
-/* Animations */
+/* 애니메이션 효과 */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -1763,7 +1815,7 @@ section {
     animation: fadeInUp 0.6s ease-out;
 }
 
-/* Notification Styles */
+/* 알림 메시지 스타일 */
 .notification {
     position: fixed;
     top: 80px;

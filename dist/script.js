@@ -1,16 +1,22 @@
-// Force English locale for date inputs (to prevent Korean format display)
+/**
+ * 날짜 입력 필드의 로케일을 영어로 강제 설정
+ * 한국어 날짜 형식 표시를 방지하기 위함
+ */
 document.addEventListener('DOMContentLoaded', () => {
     const dateInputs = document.querySelectorAll('input[type="date"]');
     dateInputs.forEach(input => {
         input.setAttribute('lang', 'en');
-        // Override browser's locale-based date format
+        // 브라우저의 로케일 기반 날짜 형식을 덮어쓰기
         input.addEventListener('focus', function() {
             this.setAttribute('lang', 'en');
         });
     });
 });
 
-// Mobile Navigation Toggle
+/**
+ * 모바일 네비게이션 토글 기능
+ * 햄버거 메뉴 클릭 시 메뉴 열기/닫기
+ */
 const hamburger = document.querySelector('.hamburger');
 const navMenu = document.querySelector('.nav-menu');
 
@@ -20,7 +26,7 @@ if (hamburger && navMenu) {
         hamburger.classList.toggle('active');
     });
 
-    // Close menu when clicking on a link
+    // 링크 클릭 시 메뉴 자동 닫기
     document.querySelectorAll('.nav-menu a').forEach(link => {
         link.addEventListener('click', () => {
             navMenu.classList.remove('active');
@@ -29,13 +35,17 @@ if (hamburger && navMenu) {
     });
 }
 
-// Smooth scroll for anchor links
+/**
+ * 앵커 링크 부드러운 스크롤 기능
+ * 네비게이션 메뉴의 앵커 링크 클릭 시 해당 섹션으로 부드럽게 스크롤
+ */
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
-            const offsetTop = target.offsetTop - 44; // Account for sticky nav
+            // 스티키 네비게이션 바 높이(44px) 고려한 오프셋
+            const offsetTop = target.offsetTop - 44;
             window.scrollTo({
                 top: offsetTop,
                 behavior: 'smooth'
@@ -44,13 +54,17 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Navbar background on scroll
+/**
+ * 스크롤 시 네비게이션 바 배경색 변경
+ * 스크롤 위치에 따라 네비게이션 바의 투명도와 그림자 효과 조정
+ */
 const navbar = document.querySelector('.navbar');
 let lastScroll = 0;
 
 window.addEventListener('scroll', () => {
     const currentScroll = window.pageYOffset;
     
+    // 50px 이상 스크롤 시 배경색과 그림자 효과 적용
     if (currentScroll > 50) {
         navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
         navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
@@ -62,30 +76,33 @@ window.addEventListener('scroll', () => {
     lastScroll = currentScroll;
 });
 
-// Form submission handler
+/**
+ * 폼 제출 핸들러
+ * 예약 문의 폼 제출 시 Slack으로 메시지 전송
+ */
 const bookingForm = document.getElementById('bookingForm');
 if (bookingForm) {
     bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Get form data
+        // 폼 데이터 추출
         const formData = new FormData(bookingForm);
         const data = Object.fromEntries(formData);
         
-        // Check if Slack Webhook URL is configured
+        // Slack Webhook URL 설정 확인
         if (!SLACK_WEBHOOK_URL || SLACK_WEBHOOK_URL === 'YOUR_WEBHOOK_URL_HERE') {
             showNotification('⚠️ Slack Webhook이 설정되지 않았습니다. 관리자에게 문의하세요.', 'error');
             return;
         }
         
-        // Disable submit button to prevent double submission
+        // 중복 제출 방지를 위해 제출 버튼 비활성화
         const submitButton = bookingForm.querySelector('button[type="submit"]');
         const originalButtonText = submitButton.textContent;
         submitButton.disabled = true;
         submitButton.textContent = '전송 중...';
         
         try {
-            // Format Slack message
+            // Slack 메시지 포맷팅
             const slackMessage = {
                 text: '🚌 새로운 문의가 도착했습니다',
                 blocks: [
@@ -139,7 +156,7 @@ if (bookingForm) {
                 ]
             };
             
-            // Send to Slack
+            // Slack으로 메시지 전송
             const response = await fetch(SLACK_WEBHOOK_URL, {
                 method: 'POST',
                 headers: {
@@ -158,25 +175,29 @@ if (bookingForm) {
             console.error('Slack 전송 오류:', error);
             showNotification('❌ 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error');
         } finally {
-            // Re-enable submit button
+            // 제출 버튼 다시 활성화
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
         }
     });
 }
 
-// Notification function
+/**
+ * 알림 메시지 표시 함수
+ * @param {string} message - 표시할 메시지
+ * @param {string} type - 알림 타입 ('success' 또는 'error')
+ */
 function showNotification(message, type = 'success') {
-    // Remove existing notification if any
+    // 기존 알림이 있으면 제거
     const existingNotification = document.querySelector('.notification');
     if (existingNotification) {
         existingNotification.remove();
     }
     
-    // Set background color based on type
+    // 타입에 따라 배경색 설정 (에러: 빨강, 성공: 검정)
     const backgroundColor = type === 'error' ? '#d32f2f' : '#1d1d1f';
     
-    // Create notification element
+    // 알림 요소 생성
     const notification = document.createElement('div');
     notification.className = 'notification';
     notification.textContent = message;
@@ -197,7 +218,7 @@ function showNotification(message, type = 'success') {
         text-align: center;
     `;
     
-    // Add animation
+    // 애니메이션 스타일 추가
     const style = document.createElement('style');
     style.textContent = `
         @keyframes slideDown {
@@ -225,7 +246,7 @@ function showNotification(message, type = 'success') {
     
     document.body.appendChild(notification);
     
-    // Remove notification after 5 seconds
+    // 5초 후 알림 자동 제거
     setTimeout(() => {
         notification.style.animation = 'slideUp 0.3s ease-out';
         setTimeout(() => {
@@ -235,10 +256,13 @@ function showNotification(message, type = 'success') {
     }, 5000);
 }
 
-// Intersection Observer for fade-in animations
+/**
+ * Intersection Observer를 사용한 페이드인 애니메이션
+ * 요소가 화면에 나타날 때 부드럽게 나타나는 효과
+ */
 const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
+    threshold: 0.1, // 요소가 10% 보일 때 트리거
+    rootMargin: '0px 0px -50px 0px' // 하단에서 50px 전에 트리거
 };
 
 const observer = new IntersectionObserver((entries) => {
@@ -250,7 +274,10 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
-// Observe elements for animation
+/**
+ * 애니메이션 대상 요소 관찰 시작
+ * 서비스 카드, 기능 아이템, 지역 아이템, 연락처 아이템에 페이드인 효과 적용
+ */
 document.addEventListener('DOMContentLoaded', () => {
     const animatedElements = document.querySelectorAll('.service-card, .feature-item, .area-item, .contact-item');
     animatedElements.forEach(el => {
@@ -261,23 +288,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Add active state to current section in navigation
+/**
+ * 현재 섹션에 해당하는 네비게이션 링크에 활성 상태 추가
+ * 스크롤 위치에 따라 해당하는 네비게이션 메뉴 항목을 하이라이트
+ */
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-menu a[href^="#"]');
 
 function highlightNavigation() {
     let current = '';
     
+    // 현재 스크롤 위치에 해당하는 섹션 찾기
     sections.forEach(section => {
         const sectionTop = section.offsetTop;
         const sectionHeight = section.clientHeight;
+        // 섹션 상단에서 100px 전에 진입하면 해당 섹션으로 인식
         if (pageYOffset >= sectionTop - 100) {
             current = section.getAttribute('id');
         }
     });
     
+    // 네비게이션 링크 스타일 업데이트
     navLinks.forEach(link => {
         link.style.color = 'var(--color-text-secondary)';
+        // 현재 섹션에 해당하는 링크만 강조
         if (link.getAttribute('href') === `#${current}`) {
             link.style.color = 'var(--color-text-primary)';
         }
@@ -285,21 +319,27 @@ function highlightNavigation() {
 }
 
 window.addEventListener('scroll', highlightNavigation);
-highlightNavigation(); // Initial call
+highlightNavigation(); // 초기 호출로 현재 위치 반영
 
-// Lazy load images
+/**
+ * 이미지 지연 로딩 (Lazy Loading)
+ * 화면에 나타날 때만 이미지를 로드하여 성능 최적화
+ */
 document.addEventListener('DOMContentLoaded', () => {
     const lazyImages = document.querySelectorAll('img[loading="lazy"]');
     
+    // IntersectionObserver 지원 여부 확인
     if ('IntersectionObserver' in window) {
         const imageObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const img = entry.target;
+                    // 이미지가 이미 로드된 경우
                     if (img.complete && img.naturalHeight !== 0) {
                         img.classList.add('loaded');
                         observer.unobserve(img);
                     } else {
+                        // 이미지 로드 완료 대기
                         img.addEventListener('load', () => {
                             img.classList.add('loaded');
                         });
@@ -311,13 +351,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         lazyImages.forEach(img => imageObserver.observe(img));
     } else {
-        // Fallback for browsers without IntersectionObserver
+        // IntersectionObserver를 지원하지 않는 브라우저용 폴백
         lazyImages.forEach(img => {
             img.classList.add('loaded');
         });
     }
     
-    // Handle image loading errors
+    // 이미지 로딩 오류 처리
     document.querySelectorAll('img').forEach(img => {
         img.addEventListener('error', function() {
             this.style.display = 'none';

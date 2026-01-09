@@ -1,14 +1,37 @@
 # Slack Webhook URL 보안을 위해 config.js는 제외
 config.js
+config/config.js
+
+# 빌드 결과물 (dist 폴더는 포함하지만 백업은 제외)
+dist/*.bak
+dist/*.backup
 
 # OS files
 .DS_Store
 Thumbs.db
-
-# Editor files
-.vscode/
-.idea/
 *.swp
 *.swo
 *~
 
+# Editor files
+.vscode/
+.idea/
+*.sublime-*
+
+# 로그 파일
+*.log
+/tmp/
+/slack_proxy.log
+
+# 불필요한 중복 폴더 (정리됨 - 참고용)
+# deploy_files/
+# temp_deploy/
+# public/
+
+# Node modules (사용하는 경우)
+node_modules/
+
+# Python 캐시 (프록시 서버용)
+__pycache__/
+*.pyc
+*.pyo
