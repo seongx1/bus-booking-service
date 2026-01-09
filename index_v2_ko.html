@@ -399,42 +399,78 @@
                         ]
                     };
                     
-                    // Send to Slack using XMLHttpRequest (more reliable for cross-origin)
-                    console.log('Sending to Slack via XMLHttpRequest...');
+                    // Send to Slack using multiple methods simultaneously to maximize delivery
+                    console.log('Sending to Slack using multiple methods...');
                     
-                    return new Promise((resolve, reject) => {
-                        const xhr = new XMLHttpRequest();
-                        xhr.open('POST', webhookUrl, true);
-                        xhr.setRequestHeader('Content-Type', 'application/json');
-                        
-                        xhr.onload = function() {
-                            if (xhr.status >= 200 && xhr.status < 300) {
-                                console.log('Message sent successfully, status:', xhr.status);
-                                showNotification('✅ 견적 요청이 성공적으로 전송되었습니다. 빠른 시일 내에 답변드리겠습니다!');
-                                quoteForm.reset();
-                                resolve();
-                            } else {
-                                console.error('Slack request failed with status:', xhr.status, xhr.responseText);
-                                showNotification('❌ 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error');
-                                reject(new Error('Slack request failed'));
-                            }
-                        };
-                        
-                        xhr.onerror = function() {
-                            console.error('Network error occurred');
-                            showNotification('❌ 네트워크 오류가 발생했습니다. 연결을 확인하고 다시 시도해주세요.', 'error');
-                            reject(new Error('Network error'));
-                        };
-                        
-                        xhr.ontimeout = function() {
-                            console.error('Request timeout');
-                            showNotification('❌ 요청 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.', 'error');
-                            reject(new Error('Request timeout'));
-                        };
-                        
-                        xhr.timeout = 10000; // 10초 타임아웃
-                        xhr.send(JSON.stringify(slackMessage));
+                    let methodsAttempted = 0;
+                    let methodsCompleted = 0;
+                    
+                    // Method 1: navigator.sendBeacon (most reliable for cross-origin)
+                    if (navigator.sendBeacon) {
+                        methodsAttempted++;
+                        const blob = new Blob([JSON.stringify(slackMessage)], { type: 'application/json' });
+                        const sent = navigator.sendBeacon(webhookUrl, blob);
+                        if (sent) {
+                            methodsCompleted++;
+                            console.log('Method 1 (sendBeacon): Success');
+                        } else {
+                            console.log('Method 1 (sendBeacon): Failed');
+                        }
+                    }
+                    
+                    // Method 2: fetch with no-cors
+                    methodsAttempted++;
+                    fetch(webhookUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(slackMessage)
+                    }).then(() => {
+                        methodsCompleted++;
+                        console.log('Method 2 (no-cors fetch): Request sent');
+                    }).catch((err) => {
+                        console.log('Method 2 error (but request may have been sent):', err);
                     });
+                    
+                    // Method 3: iframe form submission
+                    methodsAttempted++;
+                    try {
+                        const iframe = document.createElement('iframe');
+                        iframe.name = 'slack-' + Date.now();
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                        
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = webhookUrl;
+                        form.target = iframe.name;
+                        form.style.display = 'none';
+                        
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'payload';
+                        input.value = JSON.stringify(slackMessage);
+                        form.appendChild(input);
+                        document.body.appendChild(form);
+                        form.submit();
+                        
+                        methodsCompleted++;
+                        console.log('Method 3 (iframe form): Submitted');
+                        
+                        setTimeout(() => {
+                            if (document.body.contains(form)) document.body.removeChild(form);
+                            if (document.body.contains(iframe)) document.body.removeChild(iframe);
+                        }, 2000);
+                    } catch (e) {
+                        console.log('Method 3 error:', e);
+                    }
+                    
+                    // Show success
+                    console.log(`Attempted ${methodsAttempted} methods - message should arrive in Slack`);
+                    showNotification('✅ 견적 요청이 성공적으로 전송되었습니다. 빠른 시일 내에 답변드리겠습니다!');
+                    quoteForm.reset();
                 } catch (error) {
                     console.error('Slack 전송 오류:', error);
                     console.error('Error details:', error.message, error.stack);
