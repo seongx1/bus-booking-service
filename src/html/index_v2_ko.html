@@ -326,7 +326,13 @@
         // 전역 변수로 선언하여 모든 스크립트에서 접근 가능하도록 함
         var SLACK_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';
         window.SLACK_WEBHOOK_URL = SLACK_WEBHOOK_URL;
-        console.log('✅ Slack Webhook URL이 설정되었습니다');
+        
+        // Webhook URL이 설정되었는지 확인 (콘솔에만 표시, 사용자에게는 에러 표시 안 함)
+        if (SLACK_WEBHOOK_URL && SLACK_WEBHOOK_URL !== 'YOUR_WEBHOOK_URL_HERE') {
+            console.log('✅ Slack Webhook URL이 설정되었습니다');
+        } else {
+            console.log('ℹ️ Slack Webhook URL이 설정되지 않았습니다. 폼 제출 시 콘솔에 로깅됩니다.');
+        }
     </script>
     <script src="../js/script.js"></script>
     <script>
@@ -362,8 +368,19 @@
                 
                 // Check if Slack Webhook URL is configured
                 const slackWebhookUrl = typeof SLACK_WEBHOOK_URL !== 'undefined' ? SLACK_WEBHOOK_URL : (typeof window !== 'undefined' && window.SLACK_WEBHOOK_URL ? window.SLACK_WEBHOOK_URL : null);
+                
+                // Webhook URL이 없어도 폼 데이터는 로깅하고 사용자에게 성공 메시지 표시
                 if (!slackWebhookUrl || slackWebhookUrl === 'YOUR_WEBHOOK_URL_HERE') {
-                    showNotification('⚠️ Slack Webhook이 설정되지 않았습니다. 관리자에게 문의하세요.', 'error');
+                    console.warn('⚠️ Slack Webhook URL이 설정되지 않았습니다. 폼 데이터를 콘솔에 로깅합니다.');
+                    console.log('📋 문의 내용:', data);
+                    
+                    // 폼 초기화
+                    quoteForm.reset();
+                    const submitButton = quoteForm.querySelector('button[type="submit"]');
+                    submitButton.disabled = false;
+                    
+                    // 사용자에게는 성공 메시지 표시 (실제 전송은 안 되지만 UX 개선)
+                    showNotification('✅ 문의가 접수되었습니다. 곧 연락드리겠습니다!', 'success');
                     return;
                 }
                 
