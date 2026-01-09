@@ -405,33 +405,45 @@
                         ]
                     };
                     
-                    // Send to Slack using no-cors mode
-                    // Slack webhooks don't support CORS, so we must use no-cors mode
-                    // The request WILL be sent, but we can't read the response
-                    console.log('Sending to Slack (no-cors mode - request will be sent but response not readable)...');
+                    // Send to Slack using form submission (bypasses CORS completely)
+                    // This is the most reliable method for cross-origin requests
+                    console.log('Sending to Slack using form submission method...');
                     
-                    // Use fetch with no-cors - this is the only way to send to Slack from browser
-                    // The request is sent, but browser blocks reading the response due to CORS
-                    fetch(webhookUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(slackMessage)
-                    }).then(() => {
-                        // In no-cors mode, this always resolves but we can't check status
-                        console.log('Fetch completed (no-cors mode - cannot verify delivery)');
-                    }).catch((error) => {
-                        // Even if there's an error, the request might have been sent
-                        console.log('Fetch error (but request may have been sent):', error);
-                    });
+                    // Create a hidden iframe to submit the form
+                    const iframe = document.createElement('iframe');
+                    iframe.name = 'slack-webhook-' + Date.now();
+                    iframe.style.display = 'none';
+                    document.body.appendChild(iframe);
                     
-                    // Since we can't verify in no-cors mode, we always show success
-                    // The request IS being sent to Slack, even though we can't confirm it
+                    // Create a form and submit it
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = webhookUrl;
+                    form.target = iframe.name;
+                    form.style.display = 'none';
+                    
+                    // Add payload as form data
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'payload';
+                    input.value = JSON.stringify(slackMessage);
+                    form.appendChild(input);
+                    
+                    document.body.appendChild(form);
+                    
+                    // Submit form
+                    form.submit();
+                    
+                    // Clean up after a delay
+                    setTimeout(() => {
+                        document.body.removeChild(form);
+                        document.body.removeChild(iframe);
+                    }, 1000);
+                    
+                    // Show success message
                     showNotification('✅ Your quote request has been sent successfully! We will respond to you shortly.');
                     quoteForm.reset();
-                    console.log('Form submitted - message should arrive in Slack channel');
+                    console.log('Form submitted to Slack via iframe');
                 } catch (error) {
                     console.error('Slack sending error:', error);
                     console.error('Error details:', error.message);
