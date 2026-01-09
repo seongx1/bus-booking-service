@@ -482,67 +482,68 @@
                             showNotification(errorMsg, 'error');
                         }
                     } else {
-                        // 배포 환경에서는 여러 방법을 시도하여 최대한 확실하게 전송
-                        console.log('Sending to Slack using multiple methods...');
+                        // 배포 환경: Slack Incoming Webhooks는 CORS를 허용하지 않으므로
+                        // 여러 방법을 시도하되, 실제로는 브라우저에서 직접 호출이 제한될 수 있음
+                        console.log('Sending to Slack using reliable methods...');
                         
-                        let methodsAttempted = 0;
-                        let methodsCompleted = 0;
+                        let sentSuccessfully = false;
                         
-                        // Method 1: navigator.sendBeacon (most reliable for cross-origin, works even after page unload)
+                        // Method 1: navigator.sendBeacon (가장 확실한 방법)
+                        // sendBeacon은 Content-Type을 application/json으로 설정할 수 없지만
+                        // Slack은 text/plain도 처리할 수 있으므로 시도
                         if (navigator.sendBeacon) {
-                            methodsAttempted++;
-                            const blob = new Blob([JSON.stringify(slackMessage)], { type: 'application/json' });
-                            const sent = navigator.sendBeacon(webhookUrl, blob);
-                            if (sent) {
-                                methodsCompleted++;
-                                console.log('Method 1 (sendBeacon): Success');
-                            } else {
-                                console.log('Method 1 (sendBeacon): Failed');
+                            try {
+                                // Slack Incoming Webhooks는 JSON body를 받으므로 JSON 문자열로 전송
+                                const jsonString = JSON.stringify(slackMessage);
+                                const blob = new Blob([jsonString], { type: 'application/json' });
+                                const beaconSent = navigator.sendBeacon(webhookUrl, blob);
+                                
+                                if (beaconSent) {
+                                    console.log('✅ Method 1 (sendBeacon): Request queued successfully');
+                                    sentSuccessfully = true;
+                                } else {
+                                    console.warn('⚠️ Method 1 (sendBeacon): Failed to queue request');
+                                }
+                            } catch (e) {
+                                console.error('Method 1 (sendBeacon) error:', e);
                             }
                         }
                         
-                        // Method 2: fetch with no-cors (request is sent but response not readable)
-                        methodsAttempted++;
-                        // no-cors 모드에서는 Content-Type 헤더가 제한될 수 있으므로 제거
-                        fetch(webhookUrl, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            body: JSON.stringify(slackMessage)
-                        }).then(() => {
-                            methodsCompleted++;
-                            console.log('Method 2 (no-cors fetch): Request sent (note: CORS may block, but request is attempted)');
-                        }).catch((err) => {
-                            console.log('Method 2 error:', err);
-                        });
+                        // Method 2: fetch with no-cors (요청은 전송되지만 응답 확인 불가)
+                        // no-cors 모드에서는 Content-Type 헤더가 제한될 수 있음
+                        if (!sentSuccessfully) {
+                            fetch(webhookUrl, {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                body: JSON.stringify(slackMessage)
+                            }).then(() => {
+                                console.log('✅ Method 2 (no-cors fetch): Request sent (response not readable due to CORS, but request should reach Slack)');
+                                sentSuccessfully = true;
+                            }).catch((err) => {
+                                console.error('Method 2 (no-cors fetch) error:', err);
+                            });
+                        }
                         
-                        // Method 2.5: CORS 프록시를 통한 전송 시도 (실제로 작동하는 방법)
-                        // 주의: 실제 운영 환경에서는 서버 사이드로 전송하는 것이 권장됩니다
-                        methodsAttempted++;
-                        const corsProxyUrls = [
-                            'https://cors-anywhere.herokuapp.com/',
-                            'https://api.allorigins.win/raw?url='
-                        ];
-                        
-                        // CORS 프록시 없이 직접 전송 시도 (일부 환경에서는 작동할 수 있음)
-                        // 실제로는 서버 사이드에서 전송하는 것이 가장 확실합니다
-                        fetch(webhookUrl, {
-                            method: 'POST',
-                            mode: 'cors',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(slackMessage)
-                        }).then(response => {
-                            if (response.ok) {
-                                methodsCompleted++;
-                                console.log('✅ Method 2.5 (direct CORS): Successfully sent!');
-                                sent = true;
-                            } else {
-                                console.warn('Method 2.5 (direct CORS): Failed with status', response.status);
-                            }
-                        }).catch(err => {
-                            console.log('Method 2.5 (direct CORS): Blocked by CORS (expected), trying other methods...', err);
-                        });
+                        // Method 3: 직접 CORS 시도 (대부분 차단되지만 일부 환경에서 작동할 수 있음)
+                        if (!sentSuccessfully) {
+                            fetch(webhookUrl, {
+                                method: 'POST',
+                                mode: 'cors',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(slackMessage)
+                            }).then(response => {
+                                if (response.ok) {
+                                    console.log('✅ Method 3 (direct CORS): Successfully sent!');
+                                    sentSuccessfully = true;
+                                } else {
+                                    console.warn('Method 3 (direct CORS): Failed with status', response.status);
+                                }
+                            }).catch(err => {
+                                console.log('Method 3 (direct CORS): Blocked by CORS (expected for Slack webhooks)', err);
+                            });
+                        }
                         
                         // Method 3: iframe form submission (bypasses CORS)
                         methodsAttempted++;
