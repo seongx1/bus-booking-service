@@ -33,7 +33,7 @@ jobs:
           ./scripts/build.sh
           # Slack Webhook URL을 HTML 파일에 주입
           if [ -n "$SLACK_WEBHOOK_URL" ] && [ "$SLACK_WEBHOOK_URL" != "YOUR_WEBHOOK_URL_HERE" ]; then
-            python3 << 'EOF'
+            python3 -c "
             import os
             import re
             from pathlib import Path
@@ -43,15 +43,16 @@ jobs:
                 dist_path = Path('dist')
                 for html_file in dist_path.glob('*.html'):
                     content = html_file.read_text(encoding='utf-8')
-                    # 플레이스홀더를 실제 URL로 교체
+                    # 플레이스홀더를 실제 URL로 교체 (작은따옴표 처리)
+                    escaped_url = webhook_url.replace(\"'\", \"\\\\'\")
                     content = re.sub(
-                        r"var SLACK_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';",
-                        f"var SLACK_WEBHOOK_URL = '{webhook_url}';",
+                        r\"var SLACK_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';\",
+                        f\"var SLACK_WEBHOOK_URL = '{escaped_url}';\",
                         content
                     )
                     html_file.write_text(content, encoding='utf-8')
-                    print(f"Updated: {html_file.name}")
-            EOF
+                    print(f'Updated: {html_file.name}')
+            "
           fi
 
       - name: Upload artifact
