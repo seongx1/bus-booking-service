@@ -315,14 +315,12 @@
     </footer>
 
     <script>
-        // Slack Webhook URL 설정 (config.js가 없을 경우를 대비하여 여기에도 설정)
+        // Slack Webhook URL 설정
         // 전역 변수로 선언하여 모든 스크립트에서 접근 가능하도록 함
-        if (typeof SLACK_WEBHOOK_URL === 'undefined') {
-            var SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
-            window.SLACK_WEBHOOK_URL = SLACK_WEBHOOK_URL;
-        }
+        var SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
+        window.SLACK_WEBHOOK_URL = SLACK_WEBHOOK_URL;
+        console.log('✅ Slack Webhook URL이 설정되었습니다');
     </script>
-    <script src="config.js" onerror="console.log('config.js not found, using inline Webhook URL')"></script>
     <script src="script.js"></script>
     <script>
         // Quote form submission - use existing booking form handler
