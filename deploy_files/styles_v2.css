@@ -1038,6 +1038,13 @@ section {
     gap: var(--spacing-lg);
 }
 
+/* 연락처 카드 2개일 때 중앙 정렬 */
+.contact-grid-two {
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    max-width: 720px;
+    margin: 0 auto;
+}
+
 .contact-item {
     background-color: var(--color-surface);
     padding: var(--spacing-lg);
@@ -1457,9 +1464,14 @@ section {
     .features-grid,
     .steps-grid,
     .areas-grid,
-    .contact-grid {
+    .contact-grid,
+    .contact-grid-two {
         grid-template-columns: 1fr;
         gap: var(--spacing-md);
+    }
+
+    .contact-grid-two {
+        max-width: none;
     }
 
     .feature-item {
