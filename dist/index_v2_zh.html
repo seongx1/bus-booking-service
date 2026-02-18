@@ -324,7 +324,7 @@
     <script>
         // Slack Webhook URL 설정
         // 전역 변수로 선언하여 모든 스크립트에서 접근 가능하도록 함
-        var SLACK_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';
+        var SLACK_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE'; // 배포 시 실제 URL로 교체
         window.SLACK_WEBHOOK_URL = SLACK_WEBHOOK_URL;
         
         // Webhook URL이 설정되었는지 확인 (콘솔에만 표시, 사용자에게는 에러 표시 안 함)
@@ -366,35 +366,27 @@
                 const formData = new FormData(quoteForm);
                 const data = Object.fromEntries(formData);
                 
-                // Check if Slack Webhook URL is configured
+                const submitButton = quoteForm.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton ? submitButton.textContent : '获取报价';
+                
                 const slackWebhookUrl = typeof SLACK_WEBHOOK_URL !== 'undefined' ? SLACK_WEBHOOK_URL : (typeof window !== 'undefined' && window.SLACK_WEBHOOK_URL ? window.SLACK_WEBHOOK_URL : null);
                 
-                // Webhook URL이 없어도 폼 데이터는 로깅하고 사용자에게 성공 메시지 표시
                 if (!slackWebhookUrl || slackWebhookUrl === 'YOUR_WEBHOOK_URL_HERE') {
                     console.warn('⚠️ Slack Webhook URL未配置。将在控制台记录表单数据。');
                     console.log('📋 咨询内容:', data);
-                    
-                    // 폼 초기화
                     quoteForm.reset();
-                    const submitButton = quoteForm.querySelector('button[type="submit"]');
-                    submitButton.disabled = false;
-                    
-                    // 사용자에게는 성공 메시지 표시 (실제 전송은 안 되지만 UX 개선)
+                    if (submitButton) { submitButton.disabled = false; submitButton.textContent = originalButtonText; }
                     showNotification('✅ 已收到您的咨询。我们会尽快联系您！', 'success');
                     return;
                 }
                 
-                // 로컬 환경 감지: localhost 또는 127.0.0.1인 경우 프록시 서버 사용
                 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '';
                 const webhookUrl = isLocal ? 'http://localhost:8888/slack-webhook' : slackWebhookUrl;
                 
                 console.log('Environment:', isLocal ? 'Local (using proxy)' : 'Production (direct)');
                 console.log('Webhook URL:', webhookUrl.substring(0, 50) + '...');
                 
-                const submitButton = quoteForm.querySelector('button[type="submit"]');
-                const originalButtonText = submitButton.textContent;
-                submitButton.disabled = true;
-                submitButton.textContent = '发送中...';
+                if (submitButton) { submitButton.disabled = true; submitButton.textContent = '发送中...'; }
                 
                 try {
                     const slackMessage = {
@@ -548,8 +540,7 @@
                     console.error('Error details:', error.message, error.stack);
                     showNotification('❌ 发送时发生错误。请稍后重试。', 'error');
                 } finally {
-                    submitButton.disabled = false;
-                    submitButton.textContent = originalButtonText;
+                    if (submitButton) { submitButton.disabled = false; submitButton.textContent = originalButtonText; }
                 }
             });
             }

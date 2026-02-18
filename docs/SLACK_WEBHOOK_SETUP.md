@@ -45,9 +45,11 @@
    https://hooks.slack.com/services/T00000000/B00000000/TOKEN
    ```
 
-### 4단계: config.js 파일에 Webhook URL 설정
+### 4단계: 프로젝트에 Webhook URL 반영
 
-1. **deploy_files/config.js 파일 열기**
+**현재 배포 사이트용:** `src/html/index_v2.html`, `index_v2_ko.html`, `index_v2_ja.html`, `index_v2_zh.html` 안의 `SLACK_WEBHOOK_URL` 값을 새 URL로 바꾼 뒤 `./scripts/build.sh` 실행 후 서버에 다시 업로드하세요.
+
+**기존 (참고): deploy_files/config.js 파일 열기**
    ```bash
    /Volumes/choimacssd/너구리여행사 버스예약 서비스/deploy_files/config.js
    ```

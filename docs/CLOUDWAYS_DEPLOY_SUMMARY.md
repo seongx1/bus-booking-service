@@ -123,4 +123,5 @@ ls -la dist/
 
 ---
 
-**📚 상세 가이드는 `CLOUDWAYS_DEPLOY_DETAILED.md` 참고**
+**📚 상세 가이드:** `CLOUDWAYS_DEPLOY_DETAILED.md`  
+**🔑 API/CLI로 자동화:** `CLOUDWAYS_API_CLI_GUIDE.md` (인증키 발급 후 `scripts/cloudways-api.sh` 사용)

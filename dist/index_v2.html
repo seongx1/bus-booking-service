@@ -324,7 +324,7 @@
     <script>
         // Slack Webhook URL 설정
         // 전역 변수로 선언하여 모든 스크립트에서 접근 가능하도록 함
-        var SLACK_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';
+        var SLACK_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE'; // 배포 시 실제 URL로 교체 (GitHub 시크릿 방지)
         window.SLACK_WEBHOOK_URL = SLACK_WEBHOOK_URL;
         
         // Webhook URL이 설정되었는지 확인 (콘솔에만 표시, 사용자에게는 에러 표시 안 함)
@@ -367,6 +367,10 @@
                 const formData = new FormData(quoteForm);
                 const data = Object.fromEntries(formData);
                 
+                // Submit button (선언을 맨 앞으로 해서 early return에서도 사용 가능)
+                const submitButton = quoteForm.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton ? submitButton.textContent : 'Get Quote';
+                
                 // Check if Slack Webhook URL is configured
                 const slackWebhookUrl = typeof SLACK_WEBHOOK_URL !== 'undefined' ? SLACK_WEBHOOK_URL : (typeof window !== 'undefined' && window.SLACK_WEBHOOK_URL ? window.SLACK_WEBHOOK_URL : null);
                 
@@ -375,12 +379,8 @@
                     console.warn('⚠️ Slack Webhook URL이 설정되지 않았습니다. 폼 데이터를 콘솔에 로깅합니다.');
                     console.log('📋 문의 내용:', data);
                     
-                    // 폼 초기화
                     quoteForm.reset();
-                    submitButton.disabled = false;
-                    submitButton.textContent = originalButtonText;
-                    
-                    // 사용자에게는 성공 메시지 표시 (실제 전송은 안 되지만 UX 개선)
+                    if (submitButton) { submitButton.disabled = false; submitButton.textContent = originalButtonText; }
                     showNotification('✅ 문의가 접수되었습니다. 곧 연락드리겠습니다!', 'success');
                     return;
                 }
@@ -393,11 +393,7 @@
                 console.log('Webhook URL:', webhookUrl.substring(0, 50) + '...');
                 console.log('Sending to Slack...');
                 
-                // Disable submit button to prevent double submission
-                const submitButton = quoteForm.querySelector('button[type="submit"]');
-                const originalButtonText = submitButton.textContent;
-                submitButton.disabled = true;
-                submitButton.textContent = 'Sending...';
+                if (submitButton) { submitButton.disabled = true; submitButton.textContent = 'Sending...'; }
                 
                 try {
                     // Format Slack message
@@ -552,9 +548,7 @@
                         showNotification('❌ An error occurred while sending. Please try again later.', 'error');
                     }
                 } finally {
-                    // Re-enable submit button
-                    submitButton.disabled = false;
-                    submitButton.textContent = originalButtonText;
+                    if (submitButton) { submitButton.disabled = false; submitButton.textContent = originalButtonText; }
                 }
             });
             }

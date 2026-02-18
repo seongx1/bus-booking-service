@@ -2,6 +2,13 @@
 config.js
 config/config.js
 
+# Cloudways API 키 (절대 커밋 금지)
+.env
+.env.local
+
+# 배포용 venv (paramiko)
+.venv_deploy
+
 # 빌드 결과물 (dist 폴더는 포함하지만 백업은 제외)
 dist/*.bak
 dist/*.backup
