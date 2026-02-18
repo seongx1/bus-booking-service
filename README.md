@@ -48,8 +48,7 @@ Korea Bus Charter - 국제 관광객을 위한 버스 렌탈 서비스 웹사이
 │
 ├── 📄 .htaccess               # Apache 설정 (Cloudways 배포용)
 │
-├── 📂 .github/                 # GitHub 설정
-│   └── workflows/             # GitHub Actions (자동 배포)
+├── 📂 .github/                 # GitHub 설정 (Cloudways 배포만 사용)
 │
 ├── 📂 archive/                 # 보관용 (레거시 파일)
 │
@@ -88,31 +87,19 @@ Korea Bus Charter - 국제 관광객을 위한 버스 렌탈 서비스 웹사이
    http://localhost:8000/src/html/index_v2.html
    ```
 
-### 빌드 및 배포
+### 빌드 및 배포 (Cloudways)
 
-**GitHub Pages 배포:**
+배포는 **Cloudways**로만 진행합니다. (GitHub Pages는 사용하지 않습니다.)
+
 ```bash
-# 1. 빌드 (src/ → dist/)
-./scripts/build.sh
+# 방법 A: .env에 CLOUDWAYS_SFTP_* 설정 후 한 번에 빌드+업로드
+./scripts/deploy-to-cloudways.sh
 
-# 2. GitHub에 푸시
-git add .
-git commit -m "Build: Update dist files"
-git push
-
-# 3. GitHub Pages 자동 배포
-# Settings → Pages → Source: 'dist' 폴더 선택
-# 또는 GitHub Actions 자동 배포 사용
-```
-
-**Cloudways 배포:**
-```bash
-# 1. Cloudways 배포 준비 (빌드 + .htaccess 복사)
+# 방법 B: 빌드만 한 뒤 수동 SFTP 업로드
 ./scripts/deploy-cloudways.sh
-
-# 2. SFTP로 dist/ 폴더의 모든 파일을 /public_html/ 에 업로드
-# 자세한 가이드: docs/CLOUDWAYS_DEPLOY_SUMMARY.md
+# 그 다음 dist/ 내용을 SFTP로 서버 /public_html/ 에 업로드
 ```
+자세한 가이드: docs/CLOUDWAYS_DEPLOY_SUMMARY.md
 
 ## 📝 작업 흐름
 
@@ -136,10 +123,8 @@ git push
 
 ### 배포
 ```bash
-git add .
-git commit -m "Update"
-git push
-# → GitHub Actions가 자동으로 배포
+./scripts/deploy-cloudways.sh
+# → dist/ 내용을 SFTP로 Cloudways 서버 /public_html/ 에 업로드
 ```
 
 ## 🔧 주요 기능
@@ -148,14 +133,14 @@ git push
 - ✅ 반응형 디자인
 - ✅ Slack Webhook 연동 (견적 요청 알림)
 - ✅ 로컬 개발용 CORS 프록시 서버
-- ✅ 자동 배포 (GitHub Actions)
+- ✅ Cloudways 배포 (SFTP)
 
 ## 🛠️ 기술 스택
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
 - **Backend**: Slack Incoming Webhooks
 - **Dev Tools**: Python (프록시 서버), Shell Script
-- **Deployment**: GitHub Pages, GitHub Actions, Cloudways
+- **Deployment**: Cloudways (SFTP)
 
 ## 📚 문서
 
@@ -174,14 +159,12 @@ git push
    - 모든 수정은 `src/` 폴더에서만 진행
    - `dist/` 폴더는 빌드 스크립트가 자동 생성
 
-2. **빌드 후 배포**
-   - `./scripts/build.sh` 실행 후 `dist/` 폴더 확인
-   - `dist/` 폴더의 파일들을 GitHub에 푸시
+2. **배포**
+   - `./scripts/deploy-cloudways.sh` 실행 후 `dist/` 폴더를 SFTP로 Cloudways 서버 `/public_html/`에 업로드
+   - 자세한 배포 가이드: `docs/CLOUDWAYS_DEPLOY_SUMMARY.md`, `docs/CLOUDWAYS_DEPLOY_DETAILED.md`
 
-3. **배포 플랫폼 선택**
-   - **GitHub Pages**: Settings → Pages → Source: `dist` 폴더 선택
-   - **Cloudways**: `./scripts/deploy-cloudways.sh` 실행 후 SFTP 업로드
-   - 자세한 배포 가이드는 `docs/` 폴더 참고
+3. **GitHub Pages 폐쇄**
+   - 이 프로젝트는 GitHub Pages를 사용하지 않습니다. 이미 사용 중이었다면 저장소 **Settings → Pages**에서 Source를 "None"으로 설정해 주세요.
 
 ## 📝 라이센스
 

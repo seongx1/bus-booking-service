@@ -6,6 +6,9 @@ config/config.js
 .env
 .env.local
 
+# Cloudways 배포용 인증 정보 문서 (로컬 전용)
+**/CLOUDWAYS_인증정보.md
+
 # 배포용 venv (paramiko)
 .venv_deploy
 

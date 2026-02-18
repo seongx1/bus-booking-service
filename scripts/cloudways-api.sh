@@ -9,6 +9,7 @@ BASE_URL="https://api.cloudways.com/api/v1"
 usage() {
     echo "사용법: $0 servers                        # 서버 목록 조회"
     echo "       $0 apps <server_id>               # 해당 서버의 앱 목록 조회 (예: 1574100)"
+    echo "       $0 server-ip <server_id>          # 서버 공용 IP만 출력 (배포용)"
     echo "       $0 create-app <server_id> <이름>   # 기존 서버에 앱 추가 (PHP 스택, 예: 1574100 \"Korea bus charter\")"
     echo ""
     echo "필수 환경 변수: CLOUDWAYS_EMAIL, CLOUDWAYS_API_KEY"
@@ -59,6 +60,36 @@ cmd_apps() {
         -H "Content-Type: application/json" | python3 -m json.tool 2>/dev/null || cat
 }
 
+# 서버 공용 IP만 출력 (배포 스크립트에서 호스트로 사용)
+cmd_server_ip() {
+    local server_id="$1"
+    if [ -z "$server_id" ]; then
+        echo "오류: server_id 가 필요합니다. 예: $0 server-ip 1574100"
+        exit 1
+    fi
+    local token
+    token=$(get_access_token)
+    local res
+    res=$(curl -s -X GET "$BASE_URL/server/$server_id" \
+        -H "Authorization: Bearer $token" \
+        -H "Content-Type: application/json")
+    local ip
+    ip=$(echo "$res" | python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+    s = d.get('server') or d
+    print(s.get('public_ip') or s.get('public_ip_address') or '')
+except Exception:
+    print('')
+" 2>/dev/null)
+    if [ -z "$ip" ]; then
+        echo "오류: 서버 IP를 가져오지 못했습니다. 응답: $res" >&2
+        exit 1
+    fi
+    echo "$ip"
+}
+
 cmd_create_app() {
     local server_id="$1"
     local app_label="$2"
@@ -83,6 +114,7 @@ cmd_create_app() {
 case "${1:-}" in
     servers)     cmd_servers ;;
     apps)        cmd_apps "${2:-}" ;;
+    server-ip)   cmd_server_ip "${2:-}" ;;
     create-app)  cmd_create_app "${2:-}" "${3:-}" ;;
     *)           usage ;;
 esac

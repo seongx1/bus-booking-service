@@ -1,37 +1,30 @@
-# 웹사이트 배포 가이드
+# 웹사이트 배포 가이드 (Cloudways)
 
-## 빠른 배포 방법 (임시)
+이 프로젝트는 **Cloudways**로만 배포합니다. GitHub Pages는 사용하지 않습니다.
 
-### 방법 1: Netlify Drop (가장 빠름 - 2분)
-1. https://app.netlify.com/drop 접속
-2. 이 폴더의 파일들을 드래그 앤 드롭
-3. 즉시 배포 URL 제공됨
+## 배포 절차
 
-### 방법 2: Vercel (빠름 - 3분)
-1. https://vercel.com 접속
-2. "Add New Project" 클릭
-3. 이 폴더를 드래그 앤 드롭
-4. 즉시 배포 URL 제공됨
-
-### 방법 3: GitHub Pages (영구적)
-1. GitHub에 새 저장소 생성
-2. 다음 명령어 실행:
+**한 번에 배포 (권장)**  
+`.env`에 `CLOUDWAYS_SFTP_HOST`, `CLOUDWAYS_SFTP_USER`, `CLOUDWAYS_SFTP_PASSWORD`를 넣은 뒤:
 ```bash
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-git branch -M main
-git push -u origin main
+./scripts/deploy-to-cloudways.sh
 ```
-3. GitHub 저장소 Settings > Pages에서 Source를 "main" 브랜치로 설정
-4. 몇 분 후 `https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/index_v2.html` 접속 가능
+→ 빌드 후 자동으로 SFTP 업로드됩니다.
 
-## 현재 파일 구조
-- index_v2.html (영어)
-- index_v2_ko.html (한국어)
-- index_v2_zh.html (중국어)
-- index_v2_ja.html (일본어)
-- styles_v2.css
-- script.js
+**수동 업로드**
+1. `./scripts/deploy-cloudways.sh` 로 빌드
+2. `dist/` 폴더 **안의 모든 파일**을 SFTP로 Cloudways 앱 **`/public_html/`** 에 업로드 (FileZilla, WinSCP 등)
+
+3. **자세한 가이드**
+   - [Cloudways 배포 요약](CLOUDWAYS_DEPLOY_SUMMARY.md)
+   - [Cloudways 배포 상세](CLOUDWAYS_DEPLOY_DETAILED.md)
+   - [Cloudways API/CLI 가이드](CLOUDWAYS_API_CLI_GUIDE.md)
 
 ## 참고사항
-- config.js는 보안상 GitHub에 포함되지 않았습니다
-- Slack Webhook URL은 배포 후 별도로 설정해야 합니다
+
+- `config.js`는 보안상 GitHub에 포함되지 않습니다. 배포 서버에서 별도 설정합니다.
+- Slack Webhook URL은 배포 후 서버 환경 또는 HTML 주입으로 설정합니다.
+
+## (참고) GitHub Pages
+
+GitHub Pages는 **폐쇄**되었습니다. 기존에 Pages를 사용 중이었다면, 저장소 **Settings → Pages**에서 Source를 **None**으로 설정해 두세요.
