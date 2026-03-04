@@ -29,8 +29,17 @@ DirectoryIndex index.html index_v2.html index_v2_ko.html index_v2_ja.html index_
     ExpiresByType text/css "access plus 1 month"
     ExpiresByType text/javascript "access plus 1 month"
     ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType text/html "access plus 1 day"
+    ExpiresByType text/html "access plus 0 seconds"
 </IfModule>
+
+# HTML 캐시 방지 (배포 후 바로 반영되도록)
+<FilesMatch "\.(html|htm)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </IfModule>
+</FilesMatch>
 
 # 보안 헤더 설정
 <IfModule mod_headers.c>
@@ -52,13 +61,11 @@ DirectoryIndex index.html index_v2.html index_v2_ko.html index_v2_ja.html index_
     # RewriteCond %{HTTP_HOST} !^www\. [NC]
     # RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
     
-    # index.html 리다이렉트
-    RewriteCond %{THE_REQUEST} /index\.html[\s?] [NC]
-    RewriteRule ^index\.html$ /index_v2.html [R=301,L]
-    
-    # 루트 경로 접속 시 영어 버전으로 리다이렉트
+    # 루트·index.html → index_v2.html (캐시 우회용 ?v=2로 새 URL 부여)
     RewriteCond %{REQUEST_URI} ^/$
-    RewriteRule ^$ /index_v2.html [L]
+    RewriteRule ^$ /index_v2.html?v=2 [R=302,L]
+    RewriteCond %{THE_REQUEST} /index\.html[\s?] [NC]
+    RewriteRule ^index\.html$ /index_v2.html?v=2 [R=302,L]
 </IfModule>
 
 # CORS 설정 (API 요청용)

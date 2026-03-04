@@ -312,17 +312,8 @@
     </footer>
 
     <script>
-        // Slack Webhook URL 설정
-        // 전역 변수로 선언하여 모든 스크립트에서 접근 가능하도록 함
-        var SLACK_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE'; // 배포 시 실제 URL로 교체 (GitHub 시크릿 방지)
+        var SLACK_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';
         window.SLACK_WEBHOOK_URL = SLACK_WEBHOOK_URL;
-        
-        // Webhook URL이 설정되었는지 확인 (콘솔에만 표시, 사용자에게는 에러 표시 안 함)
-        if (SLACK_WEBHOOK_URL && SLACK_WEBHOOK_URL !== 'YOUR_WEBHOOK_URL_HERE') {
-            console.log('✅ Slack Webhook URL이 설정되었습니다');
-        } else {
-            console.log('ℹ️ Slack Webhook URL이 설정되지 않았습니다. 폼 제출 시 콘솔에 로깅됩니다.');
-        }
     </script>
     <script src="../js/script.js"></script>
     <script>
@@ -361,175 +352,62 @@
                 const submitButton = quoteForm.querySelector('button[type="submit"]');
                 const originalButtonText = submitButton ? submitButton.textContent : 'Get Quote';
                 
-                // Check if Slack Webhook URL is configured
-                const slackWebhookUrl = typeof SLACK_WEBHOOK_URL !== 'undefined' ? SLACK_WEBHOOK_URL : (typeof window !== 'undefined' && window.SLACK_WEBHOOK_URL ? window.SLACK_WEBHOOK_URL : null);
-                
-                // Webhook URL이 없어도 폼 데이터는 로깅하고 사용자에게 성공 메시지 표시
-                if (!slackWebhookUrl || slackWebhookUrl === 'YOUR_WEBHOOK_URL_HERE') {
-                    console.warn('⚠️ Slack Webhook URL이 설정되지 않았습니다. 폼 데이터를 콘솔에 로깅합니다.');
-                    console.log('📋 문의 내용:', data);
-                    
-                    quoteForm.reset();
-                    if (submitButton) { submitButton.disabled = false; submitButton.textContent = originalButtonText; }
-                    showNotification('✅ 문의가 접수되었습니다. 곧 연락드리겠습니다!', 'success');
-                    return;
-                }
-                
-                // 로컬 환경 감지: localhost 또는 127.0.0.1인 경우 프록시 서버 사용
+                // Production(도메인 연결된 사이트)에서는 같은 오리진 PHP 프록시 사용 → CORS 없이 슬랙 알림 도달
                 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '';
-                const webhookUrl = isLocal ? 'http://localhost:8888/slack-webhook' : slackWebhookUrl;
+                const webhookUrl = isLocal
+                    ? (typeof SLACK_WEBHOOK_URL !== 'undefined' && SLACK_WEBHOOK_URL && SLACK_WEBHOOK_URL !== 'YOUR_WEBHOOK_URL_HERE'
+                        ? SLACK_WEBHOOK_URL
+                        : 'http://localhost:8888/slack-webhook')
+                    : (window.location.origin + '/slack-webhook-proxy.php');
                 
-                console.log('Environment:', isLocal ? 'Local (using proxy)' : 'Production (direct)');
-                console.log('Webhook URL:', webhookUrl.substring(0, 50) + '...');
-                console.log('Sending to Slack...');
+                if (isLocal && (typeof SLACK_WEBHOOK_URL === 'undefined' || !SLACK_WEBHOOK_URL || SLACK_WEBHOOK_URL === 'YOUR_WEBHOOK_URL_HERE')) {
+                    console.warn('⚠️ Local: Set SLACK_WEBHOOK_URL or run scripts/slack_proxy.py (port 8888)');
+                }
                 
                 if (submitButton) { submitButton.disabled = true; submitButton.textContent = 'Sending...'; }
                 
                 try {
-                    // Format Slack message
                     const slackMessage = {
                         text: '🚌 New Quote Request from International Tourist',
                         blocks: [
                             {
                                 type: 'header',
-                                text: {
-                                    type: 'plain_text',
-                                    text: '🚌 New Quote Request - International Tourist'
-                                }
+                                text: { type: 'plain_text', text: '🚌 New Quote Request - International Tourist' }
                             },
                             {
                                 type: 'section',
                                 fields: [
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*Name:*\n${data.name || 'N/A'}`
-                                    },
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*Contact:*\n${data.contact || 'N/A'}`
-                                    },
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*Email:*\n${data.email || 'N/A'}`
-                                    },
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*Submitted:*\n${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}`
-                                    }
+                                    { type: 'mrkdwn', text: `*Name:*\n${data.name || 'N/A'}` },
+                                    { type: 'mrkdwn', text: `*Contact:*\n${data.contact || 'N/A'}` },
+                                    { type: 'mrkdwn', text: `*Email:*\n${data.email || 'N/A'}` },
+                                    { type: 'mrkdwn', text: `*Submitted:*\n${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}` }
                                 ]
                             },
                             {
                                 type: 'section',
-                                text: {
-                                    type: 'mrkdwn',
-                                    text: `*Inquiry:*\n\`\`\`${data.message || 'N/A'}\`\`\``
-                                }
+                                text: { type: 'mrkdwn', text: `*Inquiry:*\n\`\`\`${data.message || 'N/A'}\`\`\`` }
                             },
-                            {
-                                type: 'divider'
-                            },
+                            { type: 'divider' },
                             {
                                 type: 'context',
-                                elements: [
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `📧 Reply to: <mailto:${data.email}|${data.email}>`
-                                    }
-                                ]
+                                elements: [{ type: 'mrkdwn', text: `📧 Reply to: <mailto:${data.email}|${data.email}>` }]
                             }
                         ]
                     };
                     
-                    // 로컬 환경에서는 프록시를 통해 전송 (CORS 문제 해결)
-                    if (isLocal) {
-                        console.log('Sending to Slack via proxy server...');
-                        console.log('Proxy URL:', webhookUrl);
-                        
-                        const response = await fetch(webhookUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(slackMessage)
-                        });
-                        
-                        const result = await response.json();
-                        console.log('Proxy response:', result);
-                        
-                        if (result.success) {
-                            console.log('✅ Message sent successfully via proxy');
-                            showNotification('✅ Your quote request has been sent successfully! We will respond to you shortly.');
-                            quoteForm.reset();
-                        } else {
-                            console.error('❌ Proxy returned error:', result);
-                            const errorMsg = result.details === 'no_service' 
-                                ? '⚠️ Slack Webhook URL이 유효하지 않습니다. Webhook URL을 확인해주세요.' 
-                                : (result.message || result.error || 'Failed to send message');
-                            showNotification(errorMsg, 'error');
-                        }
-                    } else {
-                        // 배포 환경: 여러 방법을 동시에 시도하여 최대한 확실하게 전송
-                        console.log('Sending to Slack using multiple reliable methods...');
-                        
-                        // Method 1: CORS 프록시를 통한 전송 (가장 확실한 방법)
-                        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(webhookUrl);
-                        console.log('Method 1: Trying CORS proxy...');
-                        
-                        fetch(proxyUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(slackMessage)
-                        }).then(async (response) => {
-                            const result = await response.text();
-                            console.log('✅ Method 1 (CORS proxy): Success!', result);
-                        }).catch((error) => {
-                            console.warn('Method 1 (CORS proxy) failed:', error);
-                        });
-                        
-                        // Method 2: sendBeacon (브라우저가 지원하는 경우, 매우 확실함)
-                        if (navigator.sendBeacon) {
-                            try {
-                                const jsonString = JSON.stringify(slackMessage);
-                                const blob = new Blob([jsonString], { type: 'application/json' });
-                                const beaconSent = navigator.sendBeacon(webhookUrl, blob);
-                                if (beaconSent) {
-                                    console.log('✅ Method 2 (sendBeacon): Request queued successfully');
-                                } else {
-                                    console.warn('Method 2 (sendBeacon): Failed to queue');
-                                }
-                            } catch (e) {
-                                console.error('Method 2 (sendBeacon) error:', e);
-                            }
-                        }
-                        
-                        // Method 3: no-cors fetch (요청은 전송되지만 응답 확인 불가)
-                        fetch(webhookUrl, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            body: JSON.stringify(slackMessage)
-                        }).then(() => {
-                            console.log('✅ Method 3 (no-cors fetch): Request sent (may have reached Slack)');
-                        }).catch((err) => {
-                            console.warn('Method 3 (no-cors fetch) error:', err);
-                        });
-                        
-                        // Method 4: XMLHttpRequest (추가 백업)
-                        try {
-                            const xhr = new XMLHttpRequest();
-                            xhr.open('POST', webhookUrl, true);
-                            xhr.setRequestHeader('Content-Type', 'application/json');
-                            xhr.send(JSON.stringify(slackMessage));
-                            console.log('✅ Method 4 (XHR): Request sent');
-                        } catch (e) {
-                            console.warn('Method 4 (XHR) error:', e);
-                        }
-                        
-                        // 모든 방법을 시도했으므로 성공 메시지 표시
-                        console.log('✅ All methods attempted - message should arrive in Slack');
+                    const res = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(slackMessage)
+                    });
+                    const result = res.ok ? await res.json().catch(() => ({})) : null;
+                    if (res.ok && (result === null || result.success !== false)) {
                         showNotification('✅ Your quote request has been sent successfully! We will respond to you shortly.');
                         quoteForm.reset();
+                    } else {
+                        const errBody = await res.text();
+                        console.error('Slack proxy error:', res.status, errBody);
+                        showNotification('❌ Failed to send. Please try again or contact us by email.', 'error');
                     }
                 } catch (error) {
                     console.error('Slack sending error:', error);

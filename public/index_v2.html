@@ -354,24 +354,26 @@
                 const formData = new FormData(quoteForm);
                 const data = Object.fromEntries(formData);
                 
-                // Check if Slack Webhook URL is configured
-                const webhookUrl = typeof SLACK_WEBHOOK_URL !== 'undefined' ? SLACK_WEBHOOK_URL : (typeof window !== 'undefined' && window.SLACK_WEBHOOK_URL ? window.SLACK_WEBHOOK_URL : null);
-                if (!webhookUrl || webhookUrl === 'YOUR_WEBHOOK_URL_HERE') {
-                    showNotification('⚠️ Slack Webhook is not configured. Please contact administrator.', 'error');
-                    return;
+                // Production(도메인 연결된 사이트)에서는 같은 오리진 프록시 사용 → CORS 없이 슬랙 알림 도달
+                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '';
+                const webhookUrl = isLocal
+                    ? (typeof SLACK_WEBHOOK_URL !== 'undefined' && SLACK_WEBHOOK_URL && SLACK_WEBHOOK_URL !== 'YOUR_WEBHOOK_URL_HERE'
+                        ? SLACK_WEBHOOK_URL
+                        : 'http://localhost:8888/slack-webhook')
+                    : (window.location.origin + '/slack-webhook-proxy.php');
+                
+                if (isLocal && (typeof SLACK_WEBHOOK_URL === 'undefined' || !SLACK_WEBHOOK_URL || SLACK_WEBHOOK_URL === 'YOUR_WEBHOOK_URL_HERE')) {
+                    console.warn('⚠️ Local: Set SLACK_WEBHOOK_URL or run scripts/slack_proxy.py (port 8888)');
                 }
                 
-                console.log('Webhook URL:', webhookUrl.substring(0, 50) + '...');
-                console.log('Sending to Slack...');
+                console.log('Slack endpoint:', isLocal ? 'local proxy or direct' : 'same-origin proxy');
                 
-                // Disable submit button to prevent double submission
                 const submitButton = quoteForm.querySelector('button[type="submit"]');
                 const originalButtonText = submitButton.textContent;
                 submitButton.disabled = true;
                 submitButton.textContent = 'Sending...';
                 
                 try {
-                    // Format Slack message
                     const slackMessage = {
                         text: '🚌 New Quote Request from International Tourist',
                         blocks: [
@@ -385,118 +387,38 @@
                             {
                                 type: 'section',
                                 fields: [
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*Name:*\n${data.name || 'N/A'}`
-                                    },
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*Contact:*\n${data.contact || 'N/A'}`
-                                    },
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*Email:*\n${data.email || 'N/A'}`
-                                    },
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*Submitted:*\n${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}`
-                                    }
+                                    { type: 'mrkdwn', text: `*Name:*\n${data.name || 'N/A'}` },
+                                    { type: 'mrkdwn', text: `*Contact:*\n${data.contact || 'N/A'}` },
+                                    { type: 'mrkdwn', text: `*Email:*\n${data.email || 'N/A'}` },
+                                    { type: 'mrkdwn', text: `*Submitted:*\n${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}` }
                                 ]
                             },
                             {
                                 type: 'section',
-                                text: {
-                                    type: 'mrkdwn',
-                                    text: `*Inquiry:*\n\`\`\`${data.message || 'N/A'}\`\`\``
-                                }
+                                text: { type: 'mrkdwn', text: `*Inquiry:*\n\`\`\`${data.message || 'N/A'}\`\`\`` }
                             },
-                            {
-                                type: 'divider'
-                            },
+                            { type: 'divider' },
                             {
                                 type: 'context',
-                                elements: [
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `📧 Reply to: <mailto:${data.email}|${data.email}>`
-                                    }
-                                ]
+                                elements: [{ type: 'mrkdwn', text: `📧 Reply to: <mailto:${data.email}|${data.email}>` }]
                             }
                         ]
                     };
                     
-                    // Send to Slack using multiple methods simultaneously to maximize delivery
-                    console.log('Sending to Slack using multiple methods...');
-                    
-                    let methodsAttempted = 0;
-                    let methodsCompleted = 0;
-                    
-                    // Method 1: navigator.sendBeacon (most reliable for cross-origin, works even after page unload)
-                    if (navigator.sendBeacon) {
-                        methodsAttempted++;
-                        const blob = new Blob([JSON.stringify(slackMessage)], { type: 'application/json' });
-                        const sent = navigator.sendBeacon(webhookUrl, blob);
-                        if (sent) {
-                            methodsCompleted++;
-                            console.log('Method 1 (sendBeacon): Success');
-                        } else {
-                            console.log('Method 1 (sendBeacon): Failed');
-                        }
-                    }
-                    
-                    // Method 2: fetch with no-cors (request is sent but response not readable)
-                    methodsAttempted++;
-                    fetch(webhookUrl, {
+                    const res = await fetch(webhookUrl, {
                         method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(slackMessage)
-                    }).then(() => {
-                        methodsCompleted++;
-                        console.log('Method 2 (no-cors fetch): Request sent');
-                    }).catch((err) => {
-                        console.log('Method 2 error (but request may have been sent):', err);
                     });
-                    
-                    // Method 3: iframe form submission (bypasses CORS)
-                    methodsAttempted++;
-                    try {
-                        const iframe = document.createElement('iframe');
-                        iframe.name = 'slack-' + Date.now();
-                        iframe.style.display = 'none';
-                        document.body.appendChild(iframe);
-                        
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = webhookUrl;
-                        form.target = iframe.name;
-                        form.style.display = 'none';
-                        
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'payload';
-                        input.value = JSON.stringify(slackMessage);
-                        form.appendChild(input);
-                        document.body.appendChild(form);
-                        form.submit();
-                        
-                        methodsCompleted++;
-                        console.log('Method 3 (iframe form): Submitted');
-                        
-                        setTimeout(() => {
-                            if (document.body.contains(form)) document.body.removeChild(form);
-                            if (document.body.contains(iframe)) document.body.removeChild(iframe);
-                        }, 2000);
-                    } catch (e) {
-                        console.log('Method 3 error:', e);
+                    const result = res.ok ? await res.json().catch(() => ({})) : null;
+                    if (res.ok && (result === null || result.success !== false)) {
+                        showNotification('✅ Your quote request has been sent successfully! We will respond to you shortly.');
+                        quoteForm.reset();
+                    } else {
+                        const errBody = await res.text();
+                        console.error('Slack proxy error:', res.status, errBody);
+                        showNotification('❌ Failed to send. Please try again or contact us by email.', 'error');
                     }
-                    
-                    // Show success - at least one method should have sent the request
-                    console.log(`Attempted ${methodsAttempted} methods - message should arrive in Slack`);
-                    showNotification('✅ Your quote request has been sent successfully! We will respond to you shortly.');
-                    quoteForm.reset();
                 } catch (error) {
                     console.error('Slack sending error:', error);
                     console.error('Error details:', error.message);

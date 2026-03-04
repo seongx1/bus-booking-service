@@ -16,6 +16,13 @@ fi
 echo "🚀 Cloudways 배포 시작..."
 ./scripts/deploy-cloudways.sh
 
+# SLACK_WEBHOOK_URL 이 있으면 dist/에 slack_webhook_config.php 생성 (배포 시 서버에 함께 올라감)
+if [ -n "$SLACK_WEBHOOK_URL" ] && [ "$SLACK_WEBHOOK_URL" != "YOUR_WEBHOOK_URL_HERE" ]; then
+  SAFE_URL=$(echo "$SLACK_WEBHOOK_URL" | sed "s/'/\\\\'/g")
+  echo "<?php return '${SAFE_URL}';" > dist/slack_webhook_config.php
+  echo "📌 Slack Webhook 설정 파일 생성됨 (dist/slack_webhook_config.php)"
+fi
+
 # SFTP 호스트 없으면 API로 서버 IP 조회 (CLOUDWAYS_EMAIL, CLOUDWAYS_API_KEY, CLOUDWAYS_SERVER_ID 사용)
 SFTP_HOST="$CLOUDWAYS_SFTP_HOST"
 if [ -z "$SFTP_HOST" ] && [ -n "$CLOUDWAYS_EMAIL" ] && [ -n "$CLOUDWAYS_API_KEY" ]; then

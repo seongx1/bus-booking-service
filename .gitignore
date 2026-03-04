@@ -2,6 +2,10 @@
 config.js
 config/config.js
 
+# Slack Webhook 설정 (배포 서버에서만 생성, Git 제외)
+public/slack_webhook_config.php
+dist/slack_webhook_config.php
+
 # Cloudways API 키 (절대 커밋 금지)
 .env
 .env.local
@@ -45,3 +49,6 @@ node_modules/
 __pycache__/
 *.pyc
 *.pyo
+
+# 대용량 보관 파일 (로컬만)
+dev/archive/기타/*.zip

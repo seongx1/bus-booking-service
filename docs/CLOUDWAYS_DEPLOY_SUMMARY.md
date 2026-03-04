@@ -93,14 +93,14 @@ cd /home/master/applications/앱이름/public_html/
 ## 🔧 빠른 명령어
 
 ```bash
-# 1. 빌드
+# 방법 A: .env에 SFTP 설정 후 한 번에 빌드+업로드 (권장)
+# .env: CLOUDWAYS_SFTP_USER, CLOUDWAYS_SFTP_PASSWORD, (선택) CLOUDWAYS_EMAIL, CLOUDWAYS_API_KEY
+./scripts/deploy-to-cloudways.sh
+
+# 방법 B: 빌드만 하고 수동 업로드
 ./scripts/build.sh
-
-# 2. 배포 파일 확인
 ls -la dist/
-
-# 3. SFTP 업로드 또는
-# Cloudways 파일 관리자 사용
+# SFTP 또는 Cloudways 파일 관리자로 dist/ 내용을 public_html/ 에 업로드
 ```
 
 ---

@@ -15,8 +15,9 @@ echo "📁 dist 폴더 준비..."
 rm -rf dist
 mkdir -p dist
 
-# 배포 대상 파일들을 dist로 복사하고 경로 수정
-echo "📄 HTML 파일 복사 및 경로 수정..."
+# 캐시 방지용 버전 (배포할 때마다 새로 받도록)
+CACHE_VER="${BUILD_CACHE_VER:-$(date +%s)}"
+echo "📄 HTML 파일 복사 및 경로 수정... (script/i18n 캐시버전: $CACHE_VER)"
 for html_file in src/html/*.html; do
     if [ -f "$html_file" ]; then
         filename=$(basename "$html_file")
@@ -24,7 +25,7 @@ for html_file in src/html/*.html; do
         
         # 경로 수정: 상대 경로를 같은 폴더 기준으로 변경
         # ../css/styles_v2.css → styles_v2.css
-        # ../js/script.js → script.js
+        # ../js/script.js → script.js (캐시버전 쿼리 추가)
         # ../assets/images/ → 이미지 파일명 (같은 폴더에 복사되므로)
         
         # 운영체제별 sed 명령어 처리 (macOS와 Linux의 차이)
@@ -32,9 +33,9 @@ for html_file in src/html/*.html; do
             # macOS용 sed (빈 문자열을 백업 확장자로 사용)
             # CSS 경로 수정
             sed -i '' 's|href="../css/styles_v2.css"|href="styles_v2.css"|g' "dist/$filename"
-            # JavaScript 경로 수정
-            sed -i '' 's|src="../js/script.js"|src="script.js"|g' "dist/$filename"
-            sed -i '' 's|src="../js/i18n.js"|src="i18n.js"|g' "dist/$filename"
+            # JavaScript 경로 수정 + 캐시 버스팅
+            sed -i '' "s|src=\"../js/script.js\"|src=\"script.js?v=$CACHE_VER\"|g" "dist/$filename"
+            sed -i '' "s|src=\"../js/i18n.js\"|src=\"i18n.js?v=$CACHE_VER\"|g" "dist/$filename"
             # 이미지 경로 수정
             sed -i '' 's|src="../assets/images/logo-가로.png"|src="logo-가로.png"|g' "dist/$filename"
             sed -i '' 's|src="../assets/images/logo-원형.png"|src="logo-원형.png"|g' "dist/$filename"
@@ -49,9 +50,9 @@ for html_file in src/html/*.html; do
             # Linux용 sed
             # CSS 경로 수정
             sed -i 's|href="../css/styles_v2.css"|href="styles_v2.css"|g' "dist/$filename"
-            # JavaScript 경로 수정
-            sed -i 's|src="../js/script.js"|src="script.js"|g' "dist/$filename"
-            sed -i 's|src="../js/i18n.js"|src="i18n.js"|g' "dist/$filename"
+            # JavaScript 경로 수정 + 캐시 버스팅
+            sed -i "s|src=\"../js/script.js\"|src=\"script.js?v=$CACHE_VER\"|g" "dist/$filename"
+            sed -i "s|src=\"../js/i18n.js\"|src=\"i18n.js?v=$CACHE_VER\"|g" "dist/$filename"
             # 이미지 경로 수정
             sed -i 's|src="../assets/images/logo-가로.png"|src="logo-가로.png"|g' "dist/$filename"
             sed -i 's|src="../assets/images/logo-원형.png"|src="logo-원형.png"|g' "dist/$filename"
@@ -83,6 +84,17 @@ if [ -d "src/assets/images" ]; then
     cp src/assets/images/*.jpg dist/ 2>/dev/null || true
     cp src/assets/images/*.svg dist/ 2>/dev/null || true
     cp src/assets/images/*.ico dist/ 2>/dev/null || true
+fi
+
+# Slack Webhook PHP 프록시 복사 (도메인 연결 후 슬랙 알림용)
+echo "📤 Slack Webhook 프록시 복사..."
+if [ -f "public/slack-webhook-proxy.php" ]; then
+    cp public/slack-webhook-proxy.php dist/
+    echo "  ✓ slack-webhook-proxy.php"
+fi
+if [ -f "public/slack_webhook_config.php.example" ]; then
+    cp public/slack_webhook_config.php.example dist/
+    echo "  ✓ slack_webhook_config.php.example"
 fi
 
 # 빌드 완료 메시지 및 통계 출력

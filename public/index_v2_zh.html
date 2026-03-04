@@ -353,11 +353,16 @@
                 const formData = new FormData(quoteForm);
                 const data = Object.fromEntries(formData);
                 
-                // Check if Slack Webhook URL is configured
-                const webhookUrl = typeof SLACK_WEBHOOK_URL !== 'undefined' ? SLACK_WEBHOOK_URL : (typeof window !== 'undefined' && window.SLACK_WEBHOOK_URL ? window.SLACK_WEBHOOK_URL : null);
-                if (!webhookUrl || webhookUrl === 'YOUR_WEBHOOK_URL_HERE') {
-                    showNotification('⚠️ Slack Webhook未配置。请联系管理员。', 'error');
-                    return;
+                // Production(도메인 연결된 사이트)에서는 같은 오리진 프록시 사용 → CORS 없이 슬랙 알림 도달
+                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '';
+                const webhookUrl = isLocal
+                    ? (typeof SLACK_WEBHOOK_URL !== 'undefined' && SLACK_WEBHOOK_URL && SLACK_WEBHOOK_URL !== 'YOUR_WEBHOOK_URL_HERE'
+                        ? SLACK_WEBHOOK_URL
+                        : 'http://localhost:8888/slack-webhook')
+                    : (window.location.origin + '/slack-webhook-proxy.php');
+                
+                if (isLocal && (typeof SLACK_WEBHOOK_URL === 'undefined' || !SLACK_WEBHOOK_URL || SLACK_WEBHOOK_URL === 'YOUR_WEBHOOK_URL_HERE')) {
+                    console.warn('⚠️ 本地: 请设置 SLACK_WEBHOOK_URL 或运行 scripts/slack_proxy.py (8888)');
                 }
                 
                 const submitButton = quoteForm.querySelector('button[type="submit"]');
@@ -371,129 +376,45 @@
                         blocks: [
                             {
                                 type: 'header',
-                                text: {
-                                    type: 'plain_text',
-                                    text: '🚌 新的报价请求 - 中文'
-                                }
+                                text: { type: 'plain_text', text: '🚌 新的报价请求 - 中文' }
                             },
                             {
                                 type: 'section',
                                 fields: [
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*姓名:*\n${data.name || 'N/A'}`
-                                    },
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*联系电话:*\n${data.contact || 'N/A'}`
-                                    },
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*电子邮箱:*\n${data.email || 'N/A'}`
-                                    },
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `*提交时间:*\n${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Seoul' })}`
-                                    }
+                                    { type: 'mrkdwn', text: `*姓名:*\n${data.name || 'N/A'}` },
+                                    { type: 'mrkdwn', text: `*联系电话:*\n${data.contact || 'N/A'}` },
+                                    { type: 'mrkdwn', text: `*电子邮箱:*\n${data.email || 'N/A'}` },
+                                    { type: 'mrkdwn', text: `*提交时间:*\n${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Seoul' })}` }
                                 ]
                             },
                             {
                                 type: 'section',
-                                text: {
-                                    type: 'mrkdwn',
-                                    text: `*咨询内容:*\n\`\`\`${data.message || 'N/A'}\`\`\``
-                                }
+                                text: { type: 'mrkdwn', text: `*咨询内容:*\n\`\`\`${data.message || 'N/A'}\`\`\`` }
                             },
-                            {
-                                type: 'divider'
-                            },
+                            { type: 'divider' },
                             {
                                 type: 'context',
-                                elements: [
-                                    {
-                                        type: 'mrkdwn',
-                                        text: `📧 回复至: <mailto:${data.email}|${data.email}>`
-                                    }
-                                ]
+                                elements: [{ type: 'mrkdwn', text: `📧 回复至: <mailto:${data.email}|${data.email}>` }]
                             }
                         ]
                     };
                     
-                    // Send to Slack using multiple methods simultaneously to maximize delivery
-                    console.log('Sending to Slack using multiple methods...');
-                    
-                    let methodsAttempted = 0;
-                    let methodsCompleted = 0;
-                    
-                    // Method 1: navigator.sendBeacon (most reliable for cross-origin)
-                    if (navigator.sendBeacon) {
-                        methodsAttempted++;
-                        const blob = new Blob([JSON.stringify(slackMessage)], { type: 'application/json' });
-                        const sent = navigator.sendBeacon(webhookUrl, blob);
-                        if (sent) {
-                            methodsCompleted++;
-                            console.log('Method 1 (sendBeacon): Success');
-                        } else {
-                            console.log('Method 1 (sendBeacon): Failed');
-                        }
-                    }
-                    
-                    // Method 2: fetch with no-cors
-                    methodsAttempted++;
-                    fetch(webhookUrl, {
+                    const res = await fetch(webhookUrl, {
                         method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(slackMessage)
-                    }).then(() => {
-                        methodsCompleted++;
-                        console.log('Method 2 (no-cors fetch): Request sent');
-                    }).catch((err) => {
-                        console.log('Method 2 error (but request may have been sent):', err);
                     });
-                    
-                    // Method 3: iframe form submission
-                    methodsAttempted++;
-                    try {
-                        const iframe = document.createElement('iframe');
-                        iframe.name = 'slack-' + Date.now();
-                        iframe.style.display = 'none';
-                        document.body.appendChild(iframe);
-                        
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = webhookUrl;
-                        form.target = iframe.name;
-                        form.style.display = 'none';
-                        
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'payload';
-                        input.value = JSON.stringify(slackMessage);
-                        form.appendChild(input);
-                        document.body.appendChild(form);
-                        form.submit();
-                        
-                        methodsCompleted++;
-                        console.log('Method 3 (iframe form): Submitted');
-                        
-                        setTimeout(() => {
-                            if (document.body.contains(form)) document.body.removeChild(form);
-                            if (document.body.contains(iframe)) document.body.removeChild(iframe);
-                        }, 2000);
-                    } catch (e) {
-                        console.log('Method 3 error:', e);
+                    const result = res.ok ? await res.json().catch(() => ({})) : null;
+                    if (res.ok && (result === null || result.success !== false)) {
+                        showNotification('✅ 您的报价请求已成功发送！我们将尽快回复您！');
+                        quoteForm.reset();
+                    } else {
+                        const errBody = await res.text();
+                        console.error('Slack proxy error:', res.status, errBody);
+                        showNotification('❌ 发送失败。请稍后重试或通过邮件联系我们。', 'error');
                     }
-                    
-                    // Show success
-                    console.log(`Attempted ${methodsAttempted} methods - message should arrive in Slack`);
-                    showNotification('✅ 您的报价请求已成功发送！我们将尽快回复您！');
-                    quoteForm.reset();
                 } catch (error) {
                     console.error('Slack发送错误:', error);
-                    console.error('Error details:', error.message, error.stack);
                     showNotification('❌ 发送时发生错误。请稍后重试。', 'error');
                 } finally {
                     submitButton.disabled = false;

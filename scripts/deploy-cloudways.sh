@@ -76,6 +76,7 @@ check_file "favicon.ico"
 check_file "favicon-32x32.png"
 check_file "favicon-16x16.png"
 check_file ".htaccess"
+check_file "slack-webhook-proxy.php"
 
 echo ""
 

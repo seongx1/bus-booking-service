@@ -89,9 +89,15 @@ if (bookingForm) {
         const formData = new FormData(bookingForm);
         const data = Object.fromEntries(formData);
         
-        // Slack Webhook URL 설정 확인
-        if (!SLACK_WEBHOOK_URL || SLACK_WEBHOOK_URL === 'YOUR_WEBHOOK_URL_HERE') {
-            showNotification('⚠️ Slack Webhook이 설정되지 않았습니다. 관리자에게 문의하세요.', 'error');
+        // 프로덕션: 같은 오리진 프록시 사용. 로컬: SLACK_WEBHOOK_URL 또는 로컬 프록시
+        const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+        const webhookUrl = isLocal
+            ? (typeof SLACK_WEBHOOK_URL !== 'undefined' && SLACK_WEBHOOK_URL && SLACK_WEBHOOK_URL !== 'YOUR_WEBHOOK_URL_HERE'
+                ? SLACK_WEBHOOK_URL
+                : 'http://localhost:8888/slack-webhook')
+            : (window.location.origin + '/slack-webhook-proxy.php');
+        if (isLocal && (!webhookUrl || webhookUrl === 'http://localhost:8888/slack-webhook')) {
+            if (typeof console !== 'undefined') console.warn('로컬: SLACK_WEBHOOK_URL 또는 slack_proxy.py(8888) 설정 필요');
             return;
         }
         
@@ -156,20 +162,18 @@ if (bookingForm) {
                 ]
             };
             
-            // Slack으로 메시지 전송
-            const response = await fetch(SLACK_WEBHOOK_URL, {
+            // Slack으로 메시지 전송 (프로덕션: 프록시, 로컬: Webhook URL 또는 로컬 프록시)
+            const response = await fetch(webhookUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(slackMessage)
             });
-            
-            if (response.ok) {
+            const result = response.ok ? await response.json().catch(() => ({})) : null;
+            if (response.ok && (result === null || result.success !== false)) {
                 showNotification('✅ 문의가 성공적으로 전송되었습니다. 빠른 시일 내에 답변드리겠습니다!');
                 bookingForm.reset();
             } else {
-                throw new Error('Slack 전송 실패');
+                throw new Error(result && result.error ? result.error : 'Slack 전송 실패');
             }
         } catch (error) {
             console.error('Slack 전송 오류:', error);

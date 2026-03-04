@@ -1,0 +1,12 @@
+<?php
+/**
+ * Slack Webhook URL 설정 예시
+ *
+ * 사용법:
+ * 1. 이 파일을 slack_webhook_config.php 로 복사
+ * 2. 아래 return 값에 실제 Webhook URL 입력
+ * 3. slack_webhook_config.php 는 .gitignore 되어 있으므로 커밋되지 않음
+ *
+ * Webhook URL 발급: https://api.slack.com/apps → 앱 선택 → Incoming Webhooks
+ */
+return 'https://hooks.slack.com/services/YOUR_WORKSPACE/YOUR_CHANNEL/YOUR_TOKEN';
